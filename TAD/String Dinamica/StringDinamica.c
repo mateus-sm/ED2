@@ -25,10 +25,10 @@ int main(void) {
     exibir(&inicio);
     imprimirAoContrario(&inicio);
 
-    removeSelecao(&inicio, 2, 0);
+    //removeSelecao(&inicio, 2, 0);
     exibir(&inicio);
 
-    reiniciar(&inicio);
+    //reiniciar(&inicio);
     exibir(&inicio);
 
     puts("");
@@ -49,6 +49,12 @@ int main(void) {
     Strdin *str3 = NULL;
     concat(&str1, &str2, &str3);
     exibir(&str3);
+
+    puts("");
+    exibir(&inicio);
+    // Teste 5: Inserção em posição fora dos limites (negativa)
+    inserirSub(&inicio, "ERRO", -1);
+    exibir(&inicio);
 
     system("pause");
     return 0;

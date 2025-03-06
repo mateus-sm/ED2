@@ -14,8 +14,50 @@ void copia(Strdin **str1, Strdin **str2);
 void concat(Strdin **str1, Strdin **str2, Strdin **str3);
 void removeSelecao(Strdin **str, int nro, int start);
 
-void inserirSub(Strdin **str, const char sub[]) {
+//10) Insere na string str1 uma substring subs a partir da posição start;
+void inserirSub(Strdin **str, const char sub[], int start) {
+    Strdin *aux = *str, *inicio, *final;
+    int i = 0;
+
+    if (start > 0 && *str != NULL) {
+        //Chegar na pos
+        while (aux != NULL && i < start - 1) {
+            aux = aux->prox;
+            i++;
+        }
+
+        if (aux != NULL) {
+            //criar fim
+            final = aux->prox;
+            aux->prox = NULL;
+
+            //inserir string
+            for (int j = 0; sub[j] != '\0'; j++) {
+                inserir(&aux, sub[j]);
+                aux = aux->prox;
+            }
+
+            //Conetar inicio ao fim
+            aux->prox = final;
+        }
+    } 
     
+    if (start == 0) {
+        //Criar inicio
+        aux = NULL;
+        inserir(&aux, sub[0]);
+        inicio = aux;
+
+        //inserir string
+        for (int j = 1; sub[j] != '\0'; j++) {
+            inserir(&aux, sub[j]);
+            aux = aux->prox;
+        }
+        
+        //conectar inicio ao fim
+        aux->prox = *str;
+        *str = inicio;
+    }
 }
 
 void concat(Strdin **str1, Strdin **str2, Strdin **str3) {
@@ -71,7 +113,7 @@ void tamanho(Strdin **ptr, int *size) {
 void ribixe(Strdin **ptr) {
     if (*ptr != NULL) {
         ribixe(&(*ptr)->prox);
-        printf("[%c] ", (*ptr)->letra);
+        printf("'%c' ", (*ptr)->letra);
     }
 }
 
@@ -159,11 +201,11 @@ void exibir(Strdin **str) {
     if (*str != NULL) {
         aux = *str;
         while(aux->prox != NULL) {
-            printf("[%c] ", aux->letra);
+            printf("'%c' ", aux->letra);
             aux = aux->prox;
         }
 
-        printf("[%c]\n", aux->letra);
+        printf("'%c'\n", aux->letra);
     } else {
         printf("NULL\n");
     }
