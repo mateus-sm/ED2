@@ -43,9 +43,17 @@ int main(void) {
     inserir(&str2, 'a');
     inserir(&str2, 't');
 
+    if(menor(&str2, &str1)) {
+        printf("Eh menor\n");
+    }
+
     copia(&str1, &str2);
     exibir(&str2);
 
+    if(equal(&str2, &str1)) {
+        printf("Eh igual\n");
+    }
+    
     Strdin *str3 = NULL;
     concat(&str1, &str2, &str3);
     exibir(&str3);
@@ -55,6 +63,10 @@ int main(void) {
     // Teste 5: Inserção em posição fora dos limites (negativa)
     inserirSub(&inicio, "ERRO", -1);
     exibir(&inicio);
+
+    int local = 0;
+    buscaLocal(&inicio, &local, " ");
+    printf("' ' esta na pos: %d\n", local);
 
     system("pause");
     return 0;

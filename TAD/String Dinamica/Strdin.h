@@ -1,3 +1,4 @@
+#include <stdbool.h>
 typedef struct strdin {
     char letra;
     struct strdin *prox;
@@ -13,6 +14,69 @@ void inserir(Strdin **str, char info);
 void copia(Strdin **str1, Strdin **str2);
 void concat(Strdin **str1, Strdin **str2, Strdin **str3);
 void removeSelecao(Strdin **str, int nro, int start);
+void inserirSub(Strdin **str, const char sub[], int start);
+bool menor(Strdin **str1, Strdin **str2);
+
+//13) Busca a posição local na string str1 em que a string subs se inicia. Se local = 0
+//      então subs não está contida em str1, caso contrário local é a posição de início 
+//      da string subs dentro da string str1
+void buscaLocal(Strdin **str, int *local, const char sub[]) {
+    Strdin *aux = *str;
+    int flag = 0, j = 0, inicio = 0;
+
+    while (aux != NULL) {
+        if (aux->letra == sub[0]) {
+            //verificar palavra completa
+            inicio = j;
+            for (int k = 0; sub[k] != '\0'; k++) {
+                if(aux->letra != sub[k]) {
+                    flag = 1;
+                }
+                aux = aux->prox;
+                j++;
+            }
+
+            //evita demais matchs
+            if (flag == 0) {
+                aux = NULL;
+            }
+        } else {
+            aux = aux->prox;
+            j++;
+        }
+    }
+
+    *local = (flag == 1) ? 0 : inicio;
+}
+
+//12) Função que verifica se uma string (str1) é igual a outra (str2), caso verdade a função 
+//     retorna True, senão False;
+bool equal(Strdin **str1, Strdin **str2) {
+    Strdin *aux1 = *str1, *aux2 = *str2;
+    int flag = 0;
+
+    while (aux1 != NULL && aux2 != NULL) {
+        if (aux1->letra != aux2->letra) {
+            flag = 1;
+        }
+
+        aux1 = aux1->prox;
+        aux2 = aux2->prox;
+    }
+
+    return (flag == 0) ? true : false;
+}
+
+//11)  Função  que  verifica  se  uma  string  str1  é  menor  que  outra  str2,  
+//      caso  verdade  a função retorna True, senão False;
+bool menor(Strdin **str1, Strdin **str2) {
+    int x1 = 0, x2 = 0;
+
+    tamanho(str1, &x1);
+    tamanho(str2, &x2);
+
+    return (x1 < x2) ? true : false;
+}
 
 //10) Insere na string str1 uma substring subs a partir da posição start;
 void inserirSub(Strdin **str, const char sub[], int start) {
