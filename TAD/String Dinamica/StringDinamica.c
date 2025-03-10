@@ -65,7 +65,7 @@ int main(void) {
     exibir(&inicio);
 
     int local = 0;
-    buscaLocal(&inicio, &local, " ");
+    buscaLocal(&inicio, &local, "DEDE");
     printf("' ' esta na pos: %d\n", local);
 
     system("pause");

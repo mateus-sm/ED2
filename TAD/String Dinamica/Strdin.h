@@ -22,13 +22,13 @@ bool menor(Strdin **str1, Strdin **str2);
 //      da string subs dentro da string str1
 void buscaLocal(Strdin **str, int *local, const char sub[]) {
     Strdin *aux = *str;
-    int flag = 0, j = 0, inicio = 0;
+    int flag = 0, j = 0, k, inicio = 0;
 
     while (aux != NULL) {
         if (aux->letra == sub[0]) {
             //verificar palavra completa
             inicio = j;
-            for (int k = 0; sub[k] != '\0'; k++) {
+            for (k = 0; sub[k] != '\0', aux != NULL; k++) {
                 if(aux->letra != sub[k]) {
                     flag = 1;
                 }
@@ -36,7 +36,12 @@ void buscaLocal(Strdin **str, int *local, const char sub[]) {
                 j++;
             }
 
-            //evita demais matchs
+            //saiu antes de terminar o match com sub
+            if (sub[k] != '\0') {
+                flag = 1;
+            }
+
+            //condição de parada, evita demais matchs
             if (flag == 0) {
                 aux = NULL;
             }
