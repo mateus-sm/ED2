@@ -32,8 +32,9 @@ char arvVazia(Tree *t) {
     return t == NULL;
 }
 
-Tree *localizaNo(Tree *t, int alvo) {
-    Tree *no = NULL, *aux = t;
+//Precisa percorrer ela inteira
+char localizaNo(Tree *t, int alvo, Tree **arg) {
+    Tree *aux = t;
     Pilha P;
     inicializaPilha(&P);
 
@@ -47,7 +48,7 @@ Tree *localizaNo(Tree *t, int alvo) {
             //Se nao está no fim então precisa ser avaliado e processado
             else {
                 if (aux->info == alvo) {
-                    no = aux;
+                    *arg = aux;
                 }
                 if (aux->dir != NULL) {
                     push(&P, aux->dir);
@@ -57,18 +58,20 @@ Tree *localizaNo(Tree *t, int alvo) {
         }
     }
 
-    return no;
+    return (arg == NULL) ? 0 : 1;
 }
 
 // Criar um filho à direita de um dado nó; 
 // Criar um filho à esquerda de um dado nó;
+// Precisa percorrer ela toda, procurando o pai do nó a ser 
+//  criado(dunção LocalizaNo()), e ai sim criar o nó
 void insereArv(Tree **t, int info, int pai_info, char dir_info) {
     Tree *pai = NULL;
 
     if (arvVazia(*t)) {
         *t = criaNoArv(info);
     } else {
-        pai = localizaNo(*t, pai_info);
+        localizaNo(*t, pai_info, &pai);
 
         if(pai->info == pai_info) {
             if (dir_info == 'D' && pai->dir == NULL) {
@@ -83,35 +86,66 @@ void insereArv(Tree **t, int info, int pai_info, char dir_info) {
     }
 }
 
-int profundidade(Tree *t, int info) {
+//Arvore comum, precisa percorrer ela por inteiro
+//  Só funciona para elementos pra esquerda
+int nivel(Tree *t, int info) {
     Pilha P;
-    int i = 0, sub = 0;
+    int i = 0;
 
     inicializaPilha(&P);
-    push(&P, t->dir);
-    while(!pilhaVazia(&P)) {
-        if (t == NULL) {
-            pop(&P, &t);
-            i = i - sub;
-            sub = 0;
-        }
-        else {
-            if (t->info == info) {
-                inicializaPilha(&P);
+
+    if (t != NULL) {
+        push(&P, t);
+        while(!pilhaVazia(&P)) {
+            if (t == NULL) { //Cheguei no max esquerda
+                pop(&P, &t); //Volto para o pai
+                t = t->dir; //Vou para a direita
             }
-            if (t->dir != NULL) {
-                push(&P, t->dir);
-                sub = 0;
-            } else {
-                sub++;
+            else {
+                push(&P, t);
+                if (t->info == info) {
+                    i = tamanhoPilha(P);
+                }
+                t = t->esq;
             }
-            t = t->esq;
-            i++;
         }
     }
 
     return i;
 }
+
+void vazia(Tree **t) {
+    Tree *aux;
+    Pilha P;
+
+    inicializaPilha(&P);
+
+    if (*t != NULL) {
+        push(&P, *t);
+        while(!pilhaVazia(&P)) {
+            if (*t == NULL) {
+                pop(&P, &*t);
+                aux = *t;
+                *t = (*t)->dir; 
+                free(aux);
+            }
+            else {
+                push(&P, *t);
+                *t = (*t)->esq;
+            }
+        }
+    }
+
+    *t = NULL;
+}
+
+// P1
+// 
+// 
+//
+//
+//214
+//200
 
 //6308846
 int main() {
@@ -132,8 +166,14 @@ int main() {
     printf("%d\n", t->esq->esq->info);
     insereArv(&t, 40, 30, 'E');
     insereArv(&t, 50, 20, 'D');
+    insereArv(&t, 60, 50, 'D');
     insereArv(&t, 99, 40, 'D');
-    printf("%d\n", profundidade(t, 50));
+    insereArv(&t, 65, 10, 'D');
+    insereArv(&t, 70, 65, 'D');
+    printf("%d\n", nivel(t, 50));
+    printf("%d\n", nivel(t, 60));
+    printf("%d\n", nivel(t, 99));
+    printf("%d\n", nivel(t, 70));
 
     system("pause");
     return 0;

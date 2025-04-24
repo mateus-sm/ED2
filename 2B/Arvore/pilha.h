@@ -77,3 +77,15 @@ void exibirPilha(Pilha *P) {
         push(P, elem);
     }
 }
+
+int tamanhoPilha(Pilha P) {
+    int i = 0;
+    Tree *aux;
+
+    while (!pilhaVazia(&P)) {
+        i++;
+        pop(&P, &aux);
+    }
+
+    return i;
+}
