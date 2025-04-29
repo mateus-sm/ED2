@@ -180,7 +180,7 @@ void Order1(Tree *t) {
     while(raiz != NULL || !pilhaVazia(&P)) {
         if (raiz == NULL) { //Cheguei no max esquerda
             pop(&P, &raiz); //Volto para o pai
-            //printf("%d ", raiz->info); //Pós Ordem
+            //printf("%d ", raiz->info); //In Ordem
             raiz = raiz->dir; //Vou para a direita
         }
         else {
@@ -212,7 +212,7 @@ void Order2(Tree *t) {
             }
 
             pop(&P, &raiz);
-            printf("%d ", raiz->info); //Pós Ordem
+            printf("%d ", raiz->info); //In Ordem
             raiz = raiz->dir; //ir para direita
             if(raiz != NULL) {
                 push(&P, raiz); //Se direita existe guarda
