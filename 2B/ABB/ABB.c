@@ -119,7 +119,7 @@ void Order1(Tree *t) {
             raiz = raiz->dir; //Vou para a direita
         }
         else {
-            printf("%d ", raiz->info); //Pré Ordem
+            //printf("%d ", raiz->info); //Pré Ordem
             push(&P, raiz);
             raiz = raiz->esq;
         }
@@ -192,7 +192,7 @@ Tree *Pai(Tree *t, int info) {
 
 //1)  Dado  um  elemento  verificar  se  está  cadastrado  na  árvore  e,  se  estiver,  
 //        exibir  seus sucessores.
-void sucessores(Tree *t, int info) {
+void antecessores(Tree *t, int info) {
     Tree *aux = t, *no = NULL;
     Pilha P1, P2;
     inicializaPilha(&P1);
@@ -247,9 +247,9 @@ int main() {
     Order1(t);
     Order2(t);
 
-    sucessores(t, 2);
-    sucessores(t, 4);
-    sucessores(t, 9);
+    antecessores(t, 2);
+    antecessores(t, 4);
+    antecessores(t, 9);
 
     // pai = Pai(t, 40);
     // printf("%d\n", pai->info);
