@@ -115,8 +115,8 @@ void construirListaRegistros(ListR **lista, char *frase) {
 
     palavra[0] = '\0';
     for (int i = 0, k = 0; i <= strlen(frase); i++) {
-        if (frase[i] == ' ') {
-            espacos++;
+        if (frase[i] == ' ' || frase[i] == '\0') {
+            espacos += (frase[i] == ' ') ? 1 : 0;
             i++;
 
             if (palavra[0] != '\0') { //Atingi o Delimitador e a palavra nao esta vazia
