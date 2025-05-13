@@ -42,13 +42,44 @@ int contaFrequencia(char *palavra, char *frase);
 
 //Struct Floresta
 Forest *criaNoForest(Huff *arv);
-void inserirFloresta(Forest **forest, int freq, int simb);
+void inserirFloresta(Forest **forest, Huff *arv);
 void exibirFloresta(Forest *forest);
 //Floresta
 void criarFloresta(Forest **ptr, ListR *lista);
 
 //Struct Huffman
 Huff *criaNoHuff(int freq, int simb);
+
+//Huffman
+void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
+    Forest *fr = NULL, *minF1 = NULL, *minF2 = NULL;
+    Huff *arv = NULL, *minT1 = NULL, *minT2 = NULL;
+
+    if (*forest != NULL) {
+        while ((*forest)->prox != NULL) {
+            minF1 = *forest;
+            minT1 = minF1->tree;
+
+            minF2 = *forest->prox;
+            minT2 = minF2->tree;
+
+            arv = criaNoHuff(minT1->frequencia + minT2->frequencia, 0);
+            arv->esq = minT1;
+            arv->dir = minT2;
+
+            *forest = minF2->prox;
+            free(minF1);
+            minF1 = NULL;
+            free(minF2);
+            minF2 = NULL;
+
+            inserirFloresta(&(*forest,) arv);
+        }
+
+        *raiz = (*forest)->tree;        
+    }
+
+}
 
 //Outros
 int getBits(int n);
@@ -57,12 +88,13 @@ int getBits(int n);
 //Usar a lista de registro com freq e simb para fazer a arvore 
 //  e só depois conseguir os codigos para a lista?
 //Os codigos serão CTF ou CTV? 
-//Como a lista ja esta ordenada precisa ordenar a floresta?
 //Ordem crescente ou decrescente faz diferença?
+//Algoritmo de Huff ta correto?
 
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
+    Huff *arv = NULL;
 
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que tempo tem o tempo ";
@@ -77,6 +109,8 @@ int main(void) {
     criarFloresta(&forest, lista);
     exibirFloresta(forest);
 
+    gerarArvoreHuffman(&arv, &forest);
+
     system("pause");
     return 0;
 }
@@ -88,20 +122,26 @@ Forest *criaNoForest(Huff *arv) {
     return forest;
 }
 
-void inserirFloresta(Forest **forest, int freq, int simb) {
-    Forest *atual = *forest;
+void inserirFloresta(Forest **forest, Huff *arv) {
+    Forest *atual = *forest, *ant = NULL;
 
-    Huff *arv = criaNoHuff(freq, simb);
     Forest *fr = criaNoForest(arv);
 
     if (*forest == NULL) {
         (*forest) = fr;
     } else {
-        while (atual->prox != NULL) {
+        while (atual != NULL && atual->tree->frequencia < arv->frequencia) {
+            ant = atual;
             atual = atual->prox;
         }
 
-        atual->prox = fr;
+        if (ant == NULL) {
+            fr->prox = *forest;
+            *forest = fr;
+        } else {
+            ant->prox = fr;
+            fr->prox = atual;
+        }
     }
 }
 
@@ -130,8 +170,10 @@ Huff *criaNoHuff(int freq, int simb) {
 }
 
 void criarFloresta(Forest **ptr, ListR *lista) {
+    Huff *arv = NULL;
     while(lista != NULL) {
-        inserirFloresta(ptr, lista->freq, lista->simbolo);
+        arv = criaNoHuff(lista->freq, lista->simbolo);
+        inserirFloresta(ptr, arv);
         lista = lista->prox;
     }
 }
@@ -207,7 +249,7 @@ void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod) 
 
         if (ant == NULL) {
             no->prox = *lista;
-            *lista   = no;
+            *lista = no;
         } else {
             ant->prox = no;
             no->prox  = atual;
@@ -229,7 +271,7 @@ void exibirListR(ListR *lista) {
 
 void construirListaRegistros(ListR **lista, char *frase) {
     char palavra[20];
-    int freq = 0, simbolo = 0, espacos = 0;
+    int freq = 0, simbolo = 1, espacos = 0;
 
     for (int i = 0, k = 0; i <= strlen(frase); i++) {
         if (frase[i] == ' ' || frase[i] == '\0') { //Atingi o Delimitador
