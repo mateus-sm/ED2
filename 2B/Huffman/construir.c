@@ -51,35 +51,8 @@ void criarFloresta(Forest **ptr, ListR *lista);
 Huff *criaNoHuff(int freq, int simb);
 
 //Huffman
-void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
-    Forest *fr = NULL, *minF1 = NULL, *minF2 = NULL;
-    Huff *arv = NULL, *minT1 = NULL, *minT2 = NULL;
-
-    if (*forest != NULL) {
-        while ((*forest)->prox != NULL) {
-            minF1 = *forest;
-            minT1 = minF1->tree;
-
-            minF2 = *forest->prox;
-            minT2 = minF2->tree;
-
-            arv = criaNoHuff(minT1->frequencia + minT2->frequencia, 0);
-            arv->esq = minT1;
-            arv->dir = minT2;
-
-            *forest = minF2->prox;
-            free(minF1);
-            minF1 = NULL;
-            free(minF2);
-            minF2 = NULL;
-
-            inserirFloresta(&(*forest,) arv);
-        }
-
-        *raiz = (*forest)->tree;        
-    }
-
-}
+void gerarArvoreHuffman(Huff **raiz, Forest **forest);
+void exibeHuff(Huff *raiz);
 
 //Outros
 int getBits(int n);
@@ -103,16 +76,62 @@ int main(void) {
                   "o tempo respondeu pro tempo que o tempo o tempo tem ";
     //printf("Frase: \"%s\"\n\n", frase2);
 
-    construirListaRegistros(&lista, frase2);
+    construirListaRegistros(&lista, frase1);
     exibirListR(lista);
 
     criarFloresta(&forest, lista);
     exibirFloresta(forest);
 
     gerarArvoreHuffman(&arv, &forest);
+    exibeHuff(arv);
 
     system("pause");
     return 0;
+}
+
+void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
+    Forest *fr = NULL, *minF1 = NULL, *minF2 = NULL;
+    Huff *arv = NULL, *minT1 = NULL, *minT2 = NULL;
+
+    if (*forest != NULL) {
+        while ((*forest)->prox != NULL) {
+            minF1 = *forest;
+            minT1 = minF1->tree;
+
+            minF2 = (*forest)->prox;
+            minT2 = minF2->tree;
+
+            arv = criaNoHuff(minT1->frequencia + minT2->frequencia, 0);
+            arv->esq = minT1;
+            arv->dir = minT2;
+
+            *forest = minF2->prox;
+            free(minF1);
+            minF1 = NULL;
+            free(minF2);
+            minF2 = NULL;
+
+            inserirFloresta(&(*forest), arv);
+        }
+
+        *raiz = (*forest)->tree;        
+    }
+
+}
+
+void exibeHuff(Huff *raiz) {
+    static int n = -1;
+    if (n == -1) {
+        printf("Arvore de Huffman: \n");
+    }
+    if (raiz != NULL) {
+        n++;
+        exibeHuff(raiz->dir);
+        for (int i = 0; i < 5 * n; i++) { printf(" "); }
+        printf("(%d,%d)\n", raiz->simbolo, raiz->frequencia);
+        exibeHuff(raiz->esq);
+        n--;
+    }
 }
 
 Forest *criaNoForest(Huff *arv) {
