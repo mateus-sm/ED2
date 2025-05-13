@@ -39,6 +39,7 @@ void exibirListR(ListR *lista);
 void construirListaRegistros(ListR **lista, char *frase);
 bool palavraCadastrada(char *palavra, ListR *lista);
 int contaFrequencia(char *palavra, char *frase);
+char *retornaPalavra(ListR *lista, int simb);
 
 //Struct Floresta
 Forest *criaNoForest(Huff *arv);
@@ -52,10 +53,7 @@ Huff *criaNoHuff(int freq, int simb);
 
 //Huffman
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
-void exibeHuff(Huff *raiz);
-
-//Outros
-int getBits(int n);
+void exibeHuff(Huff *raiz, ListR *lista);
 
 //Gravar lista de registros com o ponteiro da mesma?
 //Usar a lista de registro com freq e simb para fazer a arvore 
@@ -63,6 +61,7 @@ int getBits(int n);
 //Os codigos serão CTF ou CTV? 
 //Ordem crescente ou decrescente faz diferença?
 //Algoritmo de Huff ta correto?
+//A frase é pra ser tratada ou é pra tratar de maneira programatica
 
 int main(void) {
     ListR *lista = NULL;
@@ -71,22 +70,34 @@ int main(void) {
 
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que tempo tem o tempo ";
-    printf("Frase: \n\"%s\"\n\n", frase1);
+    //printf("Frase: \n\"%s\"\n\n", frase1);
     char *frase2 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que o tempo o tempo tem ";
-    //printf("Frase: \"%s\"\n\n", frase2);
+    printf("Frase: \n\"%s\"\n\n", frase2);
 
-    construirListaRegistros(&lista, frase1);
+    construirListaRegistros(&lista, frase2);
     exibirListR(lista);
 
     criarFloresta(&forest, lista);
     exibirFloresta(forest);
 
     gerarArvoreHuffman(&arv, &forest);
-    exibeHuff(arv);
+    exibeHuff(arv, lista);
 
     system("pause");
     return 0;
+}
+
+char *retornaPalavra(ListR *lista, int simb) {
+    while(lista != NULL && lista->simbolo != simb) {
+        lista = lista->prox;
+    }
+
+    if (lista != NULL && lista->simbolo == simb) {
+        return lista->palavra;
+    } else {
+        return "*";
+    }
 }
 
 void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
@@ -119,17 +130,17 @@ void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
 
 }
 
-void exibeHuff(Huff *raiz) {
+void exibeHuff(Huff *raiz, ListR *lista) {
     static int n = -1;
-    if (n == -1) {
-        printf("Arvore de Huffman: \n");
-    }
     if (raiz != NULL) {
+        if (n == -1) {
+            printf("Arvore de Huffman: \n");
+        }
         n++;
-        exibeHuff(raiz->dir);
+        exibeHuff(raiz->dir, lista);
         for (int i = 0; i < 5 * n; i++) { printf(" "); }
-        printf("(%d,%d)\n", raiz->simbolo, raiz->frequencia);
-        exibeHuff(raiz->esq);
+        printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
+        exibeHuff(raiz->esq, lista);
         n--;
     }
 }
@@ -195,15 +206,6 @@ void criarFloresta(Forest **ptr, ListR *lista) {
         inserirFloresta(ptr, arv);
         lista = lista->prox;
     }
-}
-
-int getBits(int n) {
-    //log de n(elementos diferentes em palavra)
-    int i = 1;
-    for(; n > pow(2,i);) {
-        i++;
-    }
-    return i;
 }
 
 bool palavraCadastrada(char *palavra, ListR *lista) {
