@@ -15,42 +15,125 @@ struct listaRegistros {
 
 typedef struct listaRegistros ListR;
 
-struct tree {
-    struct tree *esq;
+struct huff {
+    struct huff *esq;
     int      simbolo;
     int   frequencia;
-    struct tree *dir;
+    struct huff *dir;
 };
 
-typedef struct tree Tree;
+typedef struct huff Huff;
+
+struct forest {
+    struct huff *tree;
+    struct forest *prox;
+};
+
+typedef struct forest Forest;
 
 //Struct ListR
 ListR *criaNoListaReg(int simbolo, char *palavra, int freq, int cod);
 void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod);
 void exibirListR(ListR *lista);
-
 //lista de registros
 void construirListaRegistros(ListR **lista, char *frase);
 bool palavraCadastrada(char *palavra, ListR *lista);
 int contaFrequencia(char *palavra, char *frase);
 
+//Struct Floresta
+Forest *criaNoForest(Huff *arv);
+void inserirFloresta(Forest **forest, int freq, int simb);
+void exibirFloresta(Forest *forest);
+//Floresta
+void criarFloresta(Forest **ptr, ListR *lista);
+
+//Struct Huffman
+Huff *criaNoHuff(int freq, int simb);
+
+//Outros
 int getBits(int n);
+
+//Gravar lista de registros com o ponteiro da mesma?
+//Usar a lista de registro com freq e simb para fazer a arvore 
+//  e só depois conseguir os codigos para a lista?
+//Os codigos serão CTF ou CTV? 
+//Como a lista ja esta ordenada precisa ordenar a floresta?
+//Ordem crescente ou decrescente faz diferença?
 
 int main(void) {
     ListR *lista = NULL;
+    Forest *forest = NULL;
 
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
-                  "que tempo o tempo respondeu pro tempo ";
-    //printf("%s\n", frase1);
+                  "o tempo respondeu pro tempo que tempo tem o tempo ";
+    printf("Frase: \n\"%s\"\n\n", frase1);
     char *frase2 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que o tempo o tempo tem ";
-    //printf("%s\n", frase2);
+    //printf("Frase: \"%s\"\n\n", frase2);
 
     construirListaRegistros(&lista, frase2);
     exibirListR(lista);
 
+    criarFloresta(&forest, lista);
+    exibirFloresta(forest);
+
     system("pause");
     return 0;
+}
+
+Forest *criaNoForest(Huff *arv) {
+    Forest *forest = (Forest*)malloc(sizeof(Forest));
+    forest->tree = arv;
+    forest->prox = NULL;
+    return forest;
+}
+
+void inserirFloresta(Forest **forest, int freq, int simb) {
+    Forest *atual = *forest;
+
+    Huff *arv = criaNoHuff(freq, simb);
+    Forest *fr = criaNoForest(arv);
+
+    if (*forest == NULL) {
+        (*forest) = fr;
+    } else {
+        while (atual->prox != NULL) {
+            atual = atual->prox;
+        }
+
+        atual->prox = fr;
+    }
+}
+
+void exibirFloresta(Forest *forest) {
+    Huff *arv = NULL;
+    printf("Floresta: \n");
+    while (forest != NULL) {
+        arv =  forest->tree;
+        printf("Simbolo = %d ", arv->simbolo);
+        printf("Frequencia = %d \n", arv->frequencia);
+        printf("Esq = %p ", arv->esq);
+        printf("Dir = %p \n\n", arv->dir);
+        forest = forest->prox;
+    }
+}
+
+Huff *criaNoHuff(int freq, int simb) {
+    Huff *arv = (Huff*)malloc(sizeof(Huff));
+
+    arv->esq = NULL;
+    arv->dir = NULL;
+    arv->simbolo = simb;
+    arv->frequencia = freq;
+
+    return arv;
+}
+
+void criarFloresta(Forest **ptr, ListR *lista) {
+    while(lista != NULL) {
+        inserirFloresta(ptr, lista->freq, lista->simbolo);
+        lista = lista->prox;
+    }
 }
 
 int getBits(int n) {
