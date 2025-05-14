@@ -112,16 +112,18 @@ void Order1(Tree *t) {
 
     inicializaPilha(&P);
 
-    while(raiz != NULL || !pilhaVazia(&P)) {
-        if (raiz == NULL) { //Cheguei no max esquerda
-            pop(&P, &raiz); //Volto para o pai
-            //printf("%d ", raiz->info); //In Ordem
-            raiz = raiz->dir; //Vou para a direita
-        }
-        else {
-            //printf("%d ", raiz->info); //Pré Ordem
-            push(&P, raiz);
-            raiz = raiz->esq;
+    if (raiz != NULL) {
+        while(raiz != NULL || !pilhaVazia(&P)) {
+            if (raiz == NULL) { //Cheguei no max esquerda
+                pop(&P, &raiz); //Volto para o pai
+                //printf("%d ", raiz->info); //In Ordem
+                raiz = raiz->dir; //Vou para a direita
+            }
+            else {
+                printf("%d ", raiz->info); //Pré Ordem
+                push(&P, raiz);
+                raiz = raiz->esq;
+            }
         }
     }
 
@@ -219,8 +221,23 @@ void antecessores(Tree *t, int info) {
     }
 }
 
+void exibirABB(Tree *arv, int *n) {
+    if (arv != NULL) {
+        if((*n) == -1) {
+            printf("Arvore: \n");
+        }
+        (*n)++;
+        exibirABB(arv->dir, n);
+        for(int i = 0; i < 5 * (*n); i++) {printf(" ");}
+        printf("(%d)\n", arv->info);
+        exibirABB(arv->esq, n);
+        (*n)--;
+    }
+}
+
 int main() {
     Tree *t = NULL, *pai = NULL;
+    int n;
 
     inicializaArv(&t);
     //printf("%d\n", arvVazia(t));
@@ -239,10 +256,12 @@ int main() {
     insereArvRecusrsivo(&t, 8);
     insereArvRecusrsivo(&t, 9);
     
-    printf("%d\n", nivel(t, 5));
-    printf("%d\n", nivel(t, 8));
-    printf("%d\n", nivel(t, 4));
-    printf("%d\n", nivel(t, 2));
+    // printf("%d\n", nivel(t, 5));
+    // printf("%d\n", nivel(t, 8));
+    // printf("%d\n", nivel(t, 4));
+    // printf("%d\n", nivel(t, 2));
+    n = -1;
+    exibirABB(t, &n);
 
     Order1(t);
     Order2(t);
