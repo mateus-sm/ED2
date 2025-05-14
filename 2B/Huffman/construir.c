@@ -148,7 +148,7 @@ char *completarCodigos(Huff *arv, ListR *lista) {
 
 char *retornaPalavra(ListR *lista, int simb) {
     static char espadas[2];
-    sprintf(espadas, "%c", 6);
+    sprintf(espadas, "%c", 5);
 
     while(lista != NULL && lista->simbolo != simb) {
         lista = lista->prox;
@@ -197,7 +197,11 @@ void exibeHuff(Huff *raiz, ListR *lista, int *n) {
         (*n)++;
         exibeHuff(raiz->dir, lista, n);
         for (int i = 0; i < 5 * (*n); i++) { printf(" "); }
-        printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
+        if (raiz->simbolo == 0) {
+            printf("%4s\n", retornaPalavra(lista, raiz->simbolo));
+        } else {
+            printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
+        }
         exibeHuff(raiz->esq, lista, n);
         (*n)--;
     }
