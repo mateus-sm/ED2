@@ -9,7 +9,7 @@ struct listaRegistros {
     int simbolo;
     char palavra[50];
     int freq;
-    int cod;
+    char cod[50];
     struct listaRegistros *prox;
 };
 
@@ -40,8 +40,8 @@ struct gravar {
 typedef struct gravar Gravar;
 
 //Struct ListR
-ListR *criaNoListaReg(int simbolo, char *palavra, int freq, int cod);
-void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod);
+ListR *criaNoListaReg(int simbolo, char *palavra, int freq, char *cod);
+void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, char *cod);
 void exibirListR(ListR *lista);
 //lista de registros
 void construirListaRegistros(ListR **lista, char *frase);
@@ -62,8 +62,6 @@ Huff *criaNoHuff(int freq, int simb);
 //Huffman
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
-
-//Trocar cod pra string
 
 int main(void) {
     ListR *lista = NULL;
@@ -257,19 +255,19 @@ int contaFrequencia(char *palavra, char *frase) {
     return palavras;
 }
 
-ListR *criaNoListaReg(int simbolo, char *palavra, int freq, int cod) {
+ListR *criaNoListaReg(int simbolo, char *palavra, int freq, char *cod) {
     ListR *novo = (ListR*)malloc(sizeof(ListR));
 
     novo->simbolo = simbolo;
     strcpy(novo->palavra, palavra);
     novo->freq = freq;
-    novo->cod = cod;
+    strcpy(novo->cod, cod);
     novo->prox = NULL;
 
     return novo;
 }
 
-void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod) {
+void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, char *cod) {
     ListR *ant = NULL, *atual = *lista;
     ListR *no = criaNoListaReg(simbolo, palavra, freq, cod);
 
@@ -299,7 +297,7 @@ void exibirListR(ListR *lista) {
         printf("Palavra\tSimbolo\tFreq\tCodigo\n");
 
         while (atual != NULL) {
-            printf("\"%s\"\t%d\t%d\t%d\n", atual->palavra, atual->simbolo, atual->freq, atual->cod);
+            printf("\"%s\"\t%d\t%d\t%s\n", atual->palavra, atual->simbolo, atual->freq, atual->cod);
             atual = atual->prox;
         }
     }
@@ -320,7 +318,7 @@ void construirListaRegistros(ListR **lista, char *frase) {
                     freq = contaFrequencia(palavra, frase);
                     //printf("%s tem freq = %d\n", palavra, freq);
 
-                    inserirListR(lista, simbolo++, palavra, freq, 0);
+                    inserirListR(lista, simbolo++, palavra, freq, "-");
                 }
 
                 k = 0;
@@ -331,6 +329,6 @@ void construirListaRegistros(ListR **lista, char *frase) {
     }
 
     if (espacos > 0) {
-        inserirListR(lista, simbolo++, " ", espacos, 0);
+        inserirListR(lista, simbolo++, " ", espacos, "-");
     }
 }
