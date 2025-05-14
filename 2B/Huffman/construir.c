@@ -39,6 +39,8 @@ struct gravar {
 
 typedef struct gravar Gravar;
 
+#include "pilha.h"
+
 //Struct ListR
 ListR *criaNoListaReg(int simbolo, char *palavra, int freq, char *cod);
 void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, char *cod);
@@ -63,12 +65,15 @@ Huff *criaNoHuff(int freq, int simb);
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
 
+char *completarCodigos(Huff *arv, ListR *lista);
+
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
     Huff *arv = NULL;
     int n;
 
+    char *palavra = "abrac abrac abra";
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que tempo tem o tempo ";
     //printf("Frase: \n\"%s\"\n\n", frase1);
@@ -98,11 +103,53 @@ int main(void) {
     n = -1;
     exibeHuff(arv, lista, &n);
 
+    puts(" ");
+    completarCodigos(arv, lista);
+    puts(" ");
+
+    exibirListR(lista);
+
     system("pause");
     return 0;
 }
 
+char *completarCodigos(Huff *arv, ListR *lista) {
+    Huff *raiz = arv, *aux = NULL;
+    ListR *auxList = NULL;
+    char bin[50];
+    int k = 0;
+    Pilha P;
+
+    inicializaPilha(&P);
+
+    while(raiz != NULL || !pilhaVazia(P)) {
+        if (raiz == NULL) {
+            pop(&P, &raiz);
+            raiz = raiz->dir;
+            bin[k++] = '1';
+        } else {
+            if ((raiz->esq == NULL) && (raiz->dir == NULL)) {
+                auxList = lista;
+                while (auxList != NULL && auxList->simbolo != raiz->simbolo) {
+                    auxList = auxList->prox;
+                }
+                bin[k] = '\0';
+                strcpy(auxList->cod, bin);
+                k = 0;
+            }
+
+            push(&P, raiz);
+            raiz = raiz->esq;
+            bin[k++] = '0';
+        }
+    }
+
+}
+
 char *retornaPalavra(ListR *lista, int simb) {
+    static char espadas[2];
+    sprintf(espadas, "%c", 6);
+
     while(lista != NULL && lista->simbolo != simb) {
         lista = lista->prox;
     }
@@ -110,7 +157,7 @@ char *retornaPalavra(ListR *lista, int simb) {
     if (lista != NULL && lista->simbolo == simb) {
         return lista->palavra;
     } else {
-        return "*";
+        return espadas;
     }
 }
 
