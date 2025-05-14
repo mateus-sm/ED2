@@ -53,36 +53,45 @@ Huff *criaNoHuff(int freq, int simb);
 
 //Huffman
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
-void exibeHuff(Huff *raiz, ListR *lista);
+void exibeHuff(Huff *raiz, ListR *, int *);
 
-//Gravar lista de registros com o ponteiro da mesma?
-//Usar a lista de registro com freq e simb para fazer a arvore 
-//  e só depois conseguir os codigos para a lista?
-//Os codigos serão CTF ou CTV? 
-//Ordem crescente ou decrescente faz diferença?
-//Algoritmo de Huff ta correto?
-//A frase é pra ser tratada ou é pra tratar de maneira programatica
+//Trocar cod pra string
+//Fazer struct de gravar
 
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
     Huff *arv = NULL;
+    int n;
 
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que tempo tem o tempo ";
     //printf("Frase: \n\"%s\"\n\n", frase1);
     char *frase2 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
                   "o tempo respondeu pro tempo que o tempo o tempo tem ";
-    printf("Frase: \n\"%s\"\n\n", frase2);
-
-    construirListaRegistros(&lista, frase2);
+    //printf("Frase: \n\"%s\"\n\n", frase2);
+    char* texto =
+        "o rato roeu a roupa do rei de roma de roma o rei o rato a roupa roeu "
+        "roeu o rato a roupa de roma a roupa de roma o rato roeu "
+        "o rei roeu o rato de roma o rato de roma o rei roeu "
+        "o rei roeu o roupa de rato de roma de roma o rato a roupa roeu o rei "
+        "a roupa roeu o rato do rei de roma do rei de roma o rato a roupa roeu "
+        "a roupa roeu o rei do rato de roma do rato de roma o rei a roupa roeu "
+        "a roupa roeu o rei o rato roeu a roma a roma roeu o rei "
+        "roeu o rei roeu o rato roeu a roma "
+        "a roma o rato o rei roeu "
+        "rato roeu roma roma roeu rato o rei roeu roma o rei roeu rato";
+    //printf("Texto: \n\"%s\"\n\n", texto);
+    
+    construirListaRegistros(&lista, texto);
     exibirListR(lista);
 
     criarFloresta(&forest, lista);
-    exibirFloresta(forest);
+    //exibirFloresta(forest);
 
     gerarArvoreHuffman(&arv, &forest);
-    exibeHuff(arv, lista);
+    n = -1;
+    exibeHuff(arv, lista, &n);
 
     system("pause");
     return 0;
@@ -118,9 +127,7 @@ void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
 
             *forest = minF2->prox;
             free(minF1);
-            minF1 = NULL;
             free(minF2);
-            minF2 = NULL;
 
             inserirFloresta(&(*forest), arv);
         }
@@ -130,18 +137,17 @@ void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
 
 }
 
-void exibeHuff(Huff *raiz, ListR *lista) {
-    static int n = -1;
+void exibeHuff(Huff *raiz, ListR *lista, int *n) {
     if (raiz != NULL) {
-        if (n == -1) {
+        if ((*n) == -1) {
             printf("Arvore de Huffman: \n");
         }
-        n++;
-        exibeHuff(raiz->dir, lista);
-        for (int i = 0; i < 5 * n; i++) { printf(" "); }
+        (*n)++;
+        exibeHuff(raiz->dir, lista, n);
+        for (int i = 0; i < 5 * (*n); i++) { printf(" "); }
         printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
-        exibeHuff(raiz->esq, lista);
-        n--;
+        exibeHuff(raiz->esq, lista, n);
+        (*n)--;
     }
 }
 
@@ -280,13 +286,15 @@ void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod) 
 
 void exibirListR(ListR *lista) {
     ListR *atual = lista;
-    printf("Lista de Registros: \n");
-    while (atual != NULL) {
-        printf("\"%s\" ", atual->palavra);
-        printf("Simbolo: %d\n", atual->simbolo);
-        printf("Frequencia: %d ", atual->freq);
-        printf("Codigo: %d\n\n", atual->cod);
-        atual = atual->prox;
+
+    if (atual != NULL) {
+        printf("Lista de Registros: \n");
+        printf("Palavra\tSimbolo\tFreq\tCodigo\n");
+
+        while (atual != NULL) {
+            printf("\"%s\"\t%d\t%d\t%d\n", atual->palavra, atual->simbolo, atual->freq, atual->cod);
+            atual = atual->prox;
+        }
     }
 }
 
