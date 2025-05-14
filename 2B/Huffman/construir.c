@@ -31,6 +31,14 @@ struct forest {
 
 typedef struct forest Forest;
 
+struct gravar {
+    int simbolo;
+    char palavra[50];
+    char cod[50];
+};
+
+typedef struct gravar Gravar;
+
 //Struct ListR
 ListR *criaNoListaReg(int simbolo, char *palavra, int freq, int cod);
 void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, int cod);
@@ -56,7 +64,6 @@ void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
 
 //Trocar cod pra string
-//Fazer struct de gravar
 
 int main(void) {
     ListR *lista = NULL;
