@@ -64,9 +64,10 @@ Huff *criaNoHuff(int freq, int simb);
 //Huffman
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
+void completarCodigos(Huff *arv, ListR *lista);
+void codigo(Huff *arv, ListR *lista);
 
-char *completarCodigos(Huff *arv, ListR *lista);
-
+//Arrumar tabulação do exibir lista
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
@@ -93,8 +94,8 @@ int main(void) {
         "rato roeu roma roma roeu rato o rei roeu roma o rei roeu rato";
     //printf("Texto: \n\"%s\"\n\n", texto);
     
-    construirListaRegistros(&lista, texto);
-    exibirListR(lista);
+    construirListaRegistros(&lista, frase1);
+    //exibirListR(lista);
 
     criarFloresta(&forest, lista);
     //exibirFloresta(forest);
@@ -103,9 +104,7 @@ int main(void) {
     n = -1;
     exibeHuff(arv, lista, &n);
 
-    puts(" ");
-    completarCodigos(arv, lista);
-    puts(" ");
+    codigo(arv, lista);
 
     exibirListR(lista);
 
@@ -113,11 +112,12 @@ int main(void) {
     return 0;
 }
 
-char *completarCodigos(Huff *arv, ListR *lista) {
-    Huff *raiz = arv, *aux = NULL;
+//Iterativo, nao ta pegando
+void completarCodigos(Huff *arv, ListR *lista) {
+    Huff *raiz = arv;
     ListR *auxList = NULL;
     char bin[50];
-    int k = 0;
+    int k = -1, aux = 1;
     Pilha P;
 
     inicializaPilha(&P);
@@ -125,25 +125,60 @@ char *completarCodigos(Huff *arv, ListR *lista) {
     while(raiz != NULL || !pilhaVazia(P)) {
         if (raiz == NULL) {
             pop(&P, &raiz);
+            k--;
+            bin[k] = '1';
             raiz = raiz->dir;
-            bin[k++] = '1';
+            k++;
+            if(raiz == NULL) {
+                k = k - aux;
+                aux = 1;
+            } else {
+                aux++;
+            }
         } else {
             if ((raiz->esq == NULL) && (raiz->dir == NULL)) {
                 auxList = lista;
                 while (auxList != NULL && auxList->simbolo != raiz->simbolo) {
                     auxList = auxList->prox;
                 }
-                bin[k] = '\0';
+                bin[++k] = '\0';
+                k--;
                 strcpy(auxList->cod, bin);
-                k = 0;
             }
 
             push(&P, raiz);
+            k++;
+            bin[k] = '0';
             raiz = raiz->esq;
-            bin[k++] = '0';
         }
     }
 
+}
+
+void codigo(Huff *arv, ListR *lista) {
+    Huff *raiz = arv;
+    ListR *auxList = NULL;
+    static char bin[50];
+    static int k = -1;
+
+    if (arv != NULL) {
+        if (raiz->esq == NULL && raiz->dir == NULL) {
+            auxList = lista;
+            while (auxList != NULL && auxList->simbolo != raiz->simbolo) {
+                auxList = auxList->prox;
+            }
+            bin[++k] = '\0';
+            k--;
+            strcpy(auxList->cod, bin);
+        } else {
+            k++;
+            bin[k] = '0'; 
+            codigo(arv->esq, lista);
+            bin[k] = '1'; 
+            codigo(arv->dir, lista);
+            k--;
+        }
+    }
 }
 
 char *retornaPalavra(ListR *lista, int simb) {
