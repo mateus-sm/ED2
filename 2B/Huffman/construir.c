@@ -67,6 +67,12 @@ void exibeHuff(Huff *raiz, ListR *, int *);
 void completarCodigos(Huff *arv, ListR *lista);
 void codigo(Huff *arv, ListR *lista, int*, char*);
 
+//Struct Gravar
+Gravar *criaNoGravar(int simbolo, char *palavra, char *cod);
+//Gravar
+void gravarListaR(ListR *lista);
+void exibirGravar();
+
 //Conferir tamanho do texto 
 int main(void) {
     ListR *lista = NULL;
@@ -110,8 +116,54 @@ int main(void) {
 
     exibirListR(lista);
 
+    gravarListaR(lista);
+    exibirGravar();
+
     system("pause");
     return 0;
+}
+
+Gravar *criaNoGravar(int simbolo, char *palavra, char *cod) {
+    Gravar *record = (Gravar*)malloc(sizeof(Gravar));
+    record->simbolo = simbolo;
+    strcpy(record->palavra, palavra);
+    strcpy(record->cod, cod);
+    return record;
+}
+
+void gravarListaR(ListR *lista) {
+    FILE *ptr = fopen("ListaRegistros.dat", "wb");
+    Gravar *record = NULL;
+
+    while (lista != NULL) {
+        record = criaNoGravar(lista->simbolo, lista->palavra, lista->cod);
+        fwrite(record, sizeof(Gravar), 1, ptr);
+        free(record);
+        lista = lista->prox;
+    }
+
+    fclose(ptr);
+}
+
+void exibirGravar() {
+    FILE *ptr = fopen("ListaRegistros.dat", "rb");
+    Gravar record;
+    char palavra[50];
+
+    if (ptr != NULL) {
+        printf("Lista em disco: \n");
+        printf("%-15s %10s %10s\n", "Palavra", "Simbolo", "Codigo");
+
+        fread(&record, sizeof(Gravar), 1, ptr);
+        while (!feof(ptr)) {
+            sprintf(palavra, "\"%s\"", record.palavra);
+            printf("%-15s %10d %10s\n", palavra, record.simbolo, record.cod);
+            fread(&record, sizeof(Gravar), 1, ptr);
+        }
+
+    }
+
+    fclose(ptr);
 }
 
 //Iterativo, nao ta pegando
