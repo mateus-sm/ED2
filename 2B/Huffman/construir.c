@@ -65,14 +65,15 @@ Huff *criaNoHuff(int freq, int simb);
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
 void completarCodigos(Huff *arv, ListR *lista);
-void codigo(Huff *arv, ListR *lista);
+void codigo(Huff *arv, ListR *lista, int*, char*);
 
-//Arrumar tabulação do exibir lista
+//Conferir tamanho do texto 
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
     Huff *arv = NULL;
-    int n;
+    char bin[50];
+    int n, k;
 
     char *palavra = "abrac abrac abra";
     char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
@@ -94,7 +95,7 @@ int main(void) {
         "rato roeu roma roma roeu rato o rei roeu roma o rei roeu rato";
     //printf("Texto: \n\"%s\"\n\n", texto);
     
-    construirListaRegistros(&lista, frase1);
+    construirListaRegistros(&lista, texto);
     //exibirListR(lista);
 
     criarFloresta(&forest, lista);
@@ -104,7 +105,8 @@ int main(void) {
     n = -1;
     exibeHuff(arv, lista, &n);
 
-    codigo(arv, lista);
+    k = -1;
+    codigo(arv, lista, &k, bin);
 
     exibirListR(lista);
 
@@ -155,11 +157,9 @@ void completarCodigos(Huff *arv, ListR *lista) {
 
 }
 
-void codigo(Huff *arv, ListR *lista) {
+void codigo(Huff *arv, ListR *lista, int *k, char *bin) {
     Huff *raiz = arv;
     ListR *auxList = NULL;
-    static char bin[50];
-    static int k = -1;
 
     if (arv != NULL) {
         if (raiz->esq == NULL && raiz->dir == NULL) {
@@ -167,16 +167,15 @@ void codigo(Huff *arv, ListR *lista) {
             while (auxList != NULL && auxList->simbolo != raiz->simbolo) {
                 auxList = auxList->prox;
             }
-            bin[++k] = '\0';
-            k--;
+            bin[(*k) + 1] = '\0';
             strcpy(auxList->cod, bin);
         } else {
-            k++;
-            bin[k] = '0'; 
-            codigo(arv->esq, lista);
-            bin[k] = '1'; 
-            codigo(arv->dir, lista);
-            k--;
+            (*k)++;
+            bin[(*k)] = '0'; 
+            codigo(arv->esq, lista, k, bin);
+            bin[(*k)] = '1'; 
+            codigo(arv->dir, lista, k, bin);
+            (*k)--;
         }
     }
 }
@@ -377,13 +376,15 @@ void inserirListR(ListR **lista, int simbolo, char *palavra, int freq, char *cod
 
 void exibirListR(ListR *lista) {
     ListR *atual = lista;
+    char palavra[50];
 
     if (atual != NULL) {
         printf("Lista de Registros: \n");
-        printf("Palavra\tSimbolo\tFreq\tCodigo\n");
+        printf("%-15s %10s %10s %10s\n", "Palavra", "Simbolo", "Freq", "Codigo");
 
         while (atual != NULL) {
-            printf("\"%s\"\t%d\t%d\t%s\n", atual->palavra, atual->simbolo, atual->freq, atual->cod);
+            sprintf(palavra, "\"%s\"", atual->palavra);
+            printf("%-15s %10d %10d %10s\n", palavra, atual->simbolo, atual->freq, atual->cod);
             atual = atual->prox;
         }
     }
