@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
 
 struct listaRegistros {
     int simbolo;
@@ -38,6 +37,22 @@ struct gravar {
 };
 
 typedef struct gravar Gravar;
+
+struct bits {   
+    unsigned char b7:1;   
+    unsigned char b6:1;   
+    unsigned char b5:1;   
+    unsigned char b4:1;   
+    unsigned char b3:1;   
+    unsigned char b2:1;   
+    unsigned char b1:1;   
+    unsigned char b0:1; 
+};  
+
+union byte {   
+    struct bits bi;   
+    unsigned char num;
+};
 
 #include "pilha.h"
 
@@ -81,24 +96,34 @@ int main(void) {
     char bin[50];
     int n, k;
 
-    char *palavra = "abrac abrac abra";
-    char *frase1 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
-                  "o tempo respondeu pro tempo que tempo tem o tempo ";
-    //printf("Frase: \n\"%s\"\n\n", frase1);
-    char *frase2 = " o tempo perguntou pro tempo quanto tempo o tempo tem "
-                  "o tempo respondeu pro tempo que o tempo o tempo tem ";
-    //printf("Frase: \n\"%s\"\n\n", frase2);
+    char *frase = "o rato roeu a roupa do rei de roma";
+    //printf("Frase: \n\"%s\"\n\n", frase);
     char* texto =
-        "o rato roeu a roupa do rei de roma de roma o rei o rato a roupa roeu "
-        "roeu o rato a roupa de roma a roupa de roma o rato roeu "
-        "o rei roeu o rato de roma o rato de roma o rei roeu "
-        "o rei roeu o roupa de rato de roma de roma o rato a roupa roeu o rei "
-        "a roupa roeu o rato do rei de roma do rei de roma o rato a roupa roeu "
-        "a roupa roeu o rei do rato de roma do rato de roma o rei a roupa roeu "
-        "a roupa roeu o rei o rato roeu a roma a roma roeu o rei "
+        "o rato roeu a roupa do rei de roma "
+        "de roma o rei o rato a roupa roeu "
+        "roeu o rato a roupa de roma "
+        "a roupa de roma o rato roeu "
+        "o rei roeu o rato de roma "
+        "o rato de roma o rei roeu "
+        "o rei roeu o roupa do rato de roma "
+        "de roma o rato a roupa roeu o rei "
+        "a roupa roeu o rato do rei de roma "
+        "do rei de roma o rato a roupa roeu "
+        "a roupa roeu o rei do rato de roma "
+        "do rato de roma o rei a roupa roeu "
+        "a roupa roeu o rei o rato roeu a roma a roma roeu o rato "
+        "o rato roeu o rei a roupa roeu a roma o rei roeu a roupa "
+        "a roma roeu a roupa o rei roeu o rato a roupa roeu a roma "
+        "o rei roeu a roma a roma roeu o rato o rato roeu a roupa "
+        "o rato roeu a roma a roupa roeu o rei a roma roeu a roupa "
         "roeu o rei roeu o rato roeu a roma "
         "a roma o rato o rei roeu "
-        "rato roeu roma roma roeu rato o rei roeu roma o rei roeu rato";
+        "rato roeu roupa roeu rei roeu roma roeu "
+        "o rato a roupa o rei a roma "
+        "o rato rei roeu a roupa roma "
+        "o rato rei roeu a roupa do rato de roma "
+        "rato roeu roma roma roeu rato "
+        "o rei roeu roma o rei roeu rato";
     //printf("Texto: \n\"%s\"\n\n", texto);
     
     construirListaRegistros(&lista, texto);
