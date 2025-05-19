@@ -88,12 +88,15 @@ Gravar *criaNoGravar(int simbolo, char *palavra, char *cod);
 void gravarListaR(ListR *lista);
 void exibirGravar();
 
+void preencheBin(char *codigo, char *palavra, int *i);
+void codificar(char *frase, char *codigo);
+
 //Conferir tamanho do texto 
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
     Huff *arv = NULL;
-    char bin[50];
+    char bin[50], codificacao[100];
     int n, k;
 
     char *frase = "o rato roeu a roupa do rei de roma";
@@ -144,8 +147,65 @@ int main(void) {
     gravarListaR(lista);
     exibirGravar();
 
+    //Teste de função
+    // char codigo[50];
+    // char *palavra = "rato";
+    // int z = 0;
+    // preencheBin(codigo, palavra, &z);
+    // codigo[z] = '\0';
+    // printf("codigo = %s\n", codigo); 
+    // printf("palavra = %s\n", palavra); 
+    // printf("index = %d\n", z);
+    
+    codificar(frase, codificacao);
+    printf("Frase = %s\n", frase);
+    printf("Codificacao = %s\n", codificacao);
+
     system("pause");
     return 0;
+}
+
+void preencheBin(char *codigo, char *palavra, int *i) {
+    FILE *ptr = fopen("ListaRegistros.dat", "rb");
+    Gravar record;
+    int TL;
+
+    if (ptr != NULL) {
+        fread(&record, sizeof(Gravar), 1, ptr);
+        while(!feof(ptr) && !(strcmp(palavra, record.palavra) == 0)) {
+            fread(&record, sizeof(Gravar), 1, ptr);
+        }
+
+        if (strcmp(palavra, record.palavra) == 0) {
+            TL = strlen(record.cod);
+            for (int j = 0; j < TL; j++) {
+                codigo[(*i)++] = record.cod[j];
+            }
+            codigo[(*i)++] = ' ';
+        }
+    }
+}
+
+void codificar(char *frase, char *codigo) {
+    char palavraLida[50];
+    int TL = strlen(frase), k = 0, b = 0;
+
+    for (int i = 0; i <= TL; i++) {
+        if (frase[i] == ' ' || frase[i] == '\0') {
+            if (k > 0) {
+                palavraLida[k] = '\0';
+                preencheBin(codigo, palavraLida, &b);
+                k = 0;
+            }
+            if (frase[i] == ' ') {
+                preencheBin(codigo, " ", &b);
+            }
+        } else {
+            palavraLida[k++] = frase[i];
+        }
+    }
+
+    codigo[b] = '\0';
 }
 
 Gravar *criaNoGravar(int simbolo, char *palavra, char *cod) {
