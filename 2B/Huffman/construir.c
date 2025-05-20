@@ -177,12 +177,10 @@ int main(void) {
 void gravarCodificacao(char *cod) {
     FILE *ptr = fopen("Codificacao.dat", "wb");
     Byte B;
-    int TL, i = 0;
-
-    TL = strlen(cod);
+    int TL = strlen(cod);
     //printf("tamanho = %d\n", TL); system("pause");
 
-    for (int j = 0; j <= TL / 8; j++) {
+    for (int i = 0; i <= TL;) {
         B.bi.b7 = cod[i++];
         B.bi.b6 = cod[i++];
         B.bi.b5 = cod[i++];
