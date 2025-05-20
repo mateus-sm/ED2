@@ -166,12 +166,32 @@ int main(void) {
     
     codificar(frase, codificacao);
     printf("Frase = %s\n", frase);
-    printf("Codificacao = %s\n", codificacao);
+    printf("Codificacao: \n%s\n", codificacao);
 
     gravarCodificacao(codificacao);
+    lerCodificacao();
+    printf("\nArquivo: \n");
 
     system("pause");
     return 0;
+}
+
+void lerCodificacao() {
+    FILE *ptr = fopen("Codificacao.dat", "rb");
+    Byte B;
+
+    fread(&(B.num), sizeof(Byte), 1, ptr);
+    while(!feof(ptr)) {
+        printf("%d", B.bi.b7);
+        printf("%d", B.bi.b6);
+        printf("%d", B.bi.b5);
+        printf("%d", B.bi.b4);
+        printf("%d", B.bi.b3);
+        printf("%d", B.bi.b2);
+        printf("%d", B.bi.b1);
+        printf("%d", B.bi.b0);
+        fread(&(B.num), sizeof(Byte), 1, ptr);
+    }
 }
 
 void gravarCodificacao(char *cod) {
@@ -180,7 +200,7 @@ void gravarCodificacao(char *cod) {
     int TL = strlen(cod);
     //printf("tamanho = %d\n", TL); system("pause");
 
-    for (int i = 0; i <= TL;) {
+    for (int i = 0; i < TL;) {
         B.bi.b7 = cod[i++];
         B.bi.b6 = cod[i++];
         B.bi.b5 = cod[i++];
