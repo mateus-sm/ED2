@@ -54,6 +54,8 @@ union byte {
     unsigned char num;
 };
 
+typedef union byte Byte;
+
 #include "pilha.h"
 
 //Struct ListR
@@ -92,6 +94,10 @@ void preencheBin(char *codigo, char *palavra, int *i);
 void codificar(char *frase, char *codigo);
 
 //Conferir tamanho do texto 
+//Funçoes Exibir Arvore e Recuperar codigos retificar
+
+void gravarCodificacao(char *cod);
+
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
@@ -99,7 +105,8 @@ int main(void) {
     char bin[50], codificacao[100];
     int n, k;
 
-    char *frase = "o rato roeu a roupa do rei de roma";
+    char *frase = "o rato roeu a roupa do rei de roma ";
+    char *frase2 = "o rato roeu a roupa do rei de roma rato rato rei";
     //printf("Frase: \n\"%s\"\n\n", frase);
     char* texto =
         "o rato roeu a roupa do rei de roma "
@@ -161,8 +168,35 @@ int main(void) {
     printf("Frase = %s\n", frase);
     printf("Codificacao = %s\n", codificacao);
 
+    gravarCodificacao(codificacao);
+
     system("pause");
     return 0;
+}
+
+void gravarCodificacao(char *cod) {
+    FILE *ptr = fopen("Codificacao.dat", "wb");
+    Byte B;
+    int TL, i = 0;
+
+    TL = strlen(cod);
+    //printf("tamanho = %d\n", TL); system("pause");
+
+    for (int j = 0; j <= TL / 8; j++) {
+        B.bi.b7 = cod[i++];
+        B.bi.b6 = cod[i++];
+        B.bi.b5 = cod[i++];
+        B.bi.b4 = cod[i++];
+        B.bi.b3 = cod[i++];
+        B.bi.b2 = cod[i++];
+        B.bi.b1 = cod[i++];
+        B.bi.b0 = cod[i++];
+
+        fwrite(&(B.num), sizeof(Byte), 1, ptr);
+        //printf("Byte em dec = %d\n", B.num);
+    }
+
+    fclose(ptr);
 }
 
 void preencheBin(char *codigo, char *palavra, int *i) {
@@ -181,9 +215,10 @@ void preencheBin(char *codigo, char *palavra, int *i) {
             for (int j = 0; j < TL; j++) {
                 codigo[(*i)++] = record.cod[j];
             }
-            codigo[(*i)++] = ' ';
         }
     }
+
+    fclose(ptr);
 }
 
 void codificar(char *frase, char *codigo) {
@@ -203,6 +238,14 @@ void codificar(char *frase, char *codigo) {
         } else {
             palavraLida[k++] = frase[i];
         }
+    }
+    //Preparar para gravar em bytes
+    codigo[b] = '\0';
+    TL = strlen(codigo);
+    while ((TL % 8) != 0) {
+        preencheBin(codigo, " ", &b);
+        codigo[b] = '\0';
+        TL = strlen(codigo);
     }
 
     codigo[b] = '\0';
@@ -318,18 +361,15 @@ void codigo(Huff *arv, ListR *lista, int *k, char *bin) {
 }
 
 char *retornaPalavra(ListR *lista, int simb) {
-    static char espadas[2];
-    sprintf(espadas, "%c", 5);
-
     while(lista != NULL && lista->simbolo != simb) {
         lista = lista->prox;
     }
 
     if (lista != NULL && lista->simbolo == simb) {
         return lista->palavra;
-    } else {
-        return espadas;
     }
+
+    return "0";
 }
 
 void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
@@ -355,7 +395,8 @@ void gerarArvoreHuffman(Huff **raiz, Forest **forest) {
             inserirFloresta(&(*forest), arv);
         }
 
-        *raiz = (*forest)->tree;        
+        *raiz = (*forest)->tree;
+        free(forest);
     }
 
 }
@@ -369,7 +410,7 @@ void exibeHuff(Huff *raiz, ListR *lista, int *n) {
         exibeHuff(raiz->dir, lista, n);
         for (int i = 0; i < 5 * (*n); i++) { printf(" "); }
         if (raiz->simbolo == 0) {
-            printf("%4s\n", retornaPalavra(lista, raiz->simbolo));
+            printf("(0,%d)\n", raiz->frequencia);
         } else {
             printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
         }
