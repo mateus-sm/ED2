@@ -93,10 +93,12 @@ void exibirGravar();
 void preencheBin(char *codigo, char *palavra, int *i);
 void codificar(char *frase, char *codigo);
 
+//Gravar e ler arquivo
+void gravarCodificacao(char *cod);
+void lerCodificacao();
+
 //Conferir tamanho do texto 
 //Funçoes Exibir Arvore e Recuperar codigos retificar
-
-void gravarCodificacao(char *cod);
 
 int main(void) {
     ListR *lista = NULL;
