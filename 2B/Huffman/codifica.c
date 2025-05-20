@@ -93,9 +93,8 @@ void exibirGravar();
 void preencheBin(char *codigo, char *palavra, int *i);
 void codificar(char *frase, char *codigo);
 
-//Gravar e ler arquivo
+//Arquivo
 void gravarCodificacao(char *cod);
-void lerCodificacao();
 
 //Conferir tamanho do texto 
 //Funçoes Exibir Arvore e Recuperar codigos retificar
@@ -171,29 +170,9 @@ int main(void) {
     printf("Codificacao: \n%s\n", codificacao);
 
     gravarCodificacao(codificacao);
-    lerCodificacao();
-    printf("\nArquivo: \n");
 
     system("pause");
     return 0;
-}
-
-void lerCodificacao() {
-    FILE *ptr = fopen("Codificacao.dat", "rb");
-    Byte B;
-
-    fread(&(B.num), sizeof(Byte), 1, ptr);
-    while(!feof(ptr)) {
-        printf("%d", B.bi.b7);
-        printf("%d", B.bi.b6);
-        printf("%d", B.bi.b5);
-        printf("%d", B.bi.b4);
-        printf("%d", B.bi.b3);
-        printf("%d", B.bi.b2);
-        printf("%d", B.bi.b1);
-        printf("%d", B.bi.b0);
-        fread(&(B.num), sizeof(Byte), 1, ptr);
-    }
 }
 
 void gravarCodificacao(char *cod) {
