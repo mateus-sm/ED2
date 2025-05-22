@@ -161,6 +161,31 @@ void Order2(Tree *t) {
     puts("");
 }
 
+void Order3(Tree *t) {
+    Tree *raiz = NULL;
+    Pilha P1, P2;
+    inicializaPilha(&P1);
+    inicializaPilha(&P2);
+
+    push(&P1, t);
+    while(!pilhaVazia(&P1)) {
+        pop(&P1, &raiz);
+        
+        if (raiz != NULL) {
+            push(&P2, raiz); //Pós Ordem 1° Esq 2° Dir
+            //printf("%d ", raiz->info); //Pré Ordem 1° Dir 2° Esq
+            push(&P1, raiz->esq);
+            push(&P1, raiz->dir);
+        }
+    }
+
+    printf("Pos Ordem: ");
+    while(!pilhaVazia(&P2)) {
+        pop(&P2, &raiz);
+        printf("%d ", raiz->info);
+    }
+}
+
 //Retornar o pai de um dado nó.
 //Estratégia: toda vez que for pra esq ou dir verificar o atual com o prox
 //Percorrer arvore por completo pois não há ordenação
@@ -263,9 +288,12 @@ int main() {
     n = -1;
     exibirABB(t, &n);
 
+    printf("Percorrer: \n");
     Order1(t);
     Order2(t);
+    Order3(t);
 
+    printf("\nAntecessores: \n");
     antecessores(t, 2);
     antecessores(t, 4);
     antecessores(t, 9);

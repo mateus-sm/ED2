@@ -33,15 +33,15 @@ typedef struct kdtree Kdtree;
 
 void ordena(int pontos[TF][K], int d, int ini, int fim) {
     int TL = fim, i, j, aux[K];
+
     while (TL > ini) {
         for (i = ini; i < TL; i++) {
             if (pontos[i][d] > pontos[i + 1][d]) {
-                for (j = 0; j < K; j++) 
+                for (j = 0; j < K; j++) {
                     aux[j] = pontos[i][j];
-                for (j = 0; j < K; j++) 
                     pontos[i][j] = pontos[i + 1][j];
-                for (j = 0; j < K; j++) 
                     pontos[i + 1][j] = aux[j];
+                }
             }
         }
 
@@ -62,14 +62,25 @@ Kdtree *CriaNo(int ponto[K]) {
 void insereBalanceado(Kdtree **raiz, int pontos[TF][K], int n, int ini, int fim) {
     int d, meio;
 
-    if(ini < fim) {
+    if(ini <= fim) {
         d = n % K;
-        ordena(pontos, d, ini, TF - 1);
+        ordena(pontos, d, ini, fim);
         meio = (ini + fim) / 2;
 
         *raiz = CriaNo(pontos[meio]);
         insereBalanceado(&(*raiz)->esq, pontos, n + 1, ini, meio - 1);
-        insereBalanceado(&(*raiz)->esq, pontos, n + 1, meio + 1, fim);
+        insereBalanceado(&(*raiz)->dir, pontos, n + 1, meio + 1, fim);
+    }
+}
+
+void exibe(Kdtree *raiz, int *n) {
+    if (raiz != NULL) {
+        (*n)++;
+        exibe(raiz->dir, n);
+        for (int i = 0; i < 5 * (*n); i++) { printf(" "); }
+        printf("(%d,%d)\n", raiz->ponto[0], raiz->ponto[1]);
+        exibe(raiz->esq, n);
+        (*n)--;
     }
 }
 
@@ -77,11 +88,15 @@ int main(void) {
     int pontos[TF][K] = {{30,40}, {5,25}, {10,12}, {70,70}, {50,30}, {35,40}};
     int i;
     Kdtree *raiz = NULL;
-    //insereBalanceado(&raiz, pontos, 0, 0, TF - 1);
-    ordena(pontos, 0, 0, TF - 1);
-    for (i = 0; i < TF; i++) {
-        printf("%d,%d\n", pontos[i][0], pontos[0][i]);
-    }
+    insereBalanceado(&raiz, pontos, 0, 0, TF - 1);
+    //ordena(pontos, 0, 0, TF - 1);
+    // for (i = 0; i < TF; i++) {
+    //     printf("%d,%d\n", pontos[i][0], pontos[0][i]);
+    // }
+
+    printf("KdTree: \n");
+    i = -1;
+    exibe(raiz, &i);
 
     system("pause");
     return 0;
