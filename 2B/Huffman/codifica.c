@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
 
 struct listaRegistros {
     int simbolo;
@@ -107,8 +106,9 @@ int main(void) {
     int n, k;
 
     char *frase = "o rato roeu a roupa do rei de roma ";
-    char *frase2 = "o rato roeu a roupa do rei de roma rato rato rei";
     //printf("Frase: \n\"%s\"\n\n", frase);
+    char *frase2 = "o rato roeu a roupa do rei de roma rato rato rei";
+    //printf("Frase: \n\"%s\"\n\n", frase2);
     char* texto =
         "o rato roeu a roupa do rei de roma "
         "de roma o rei o rato a roupa roeu "
@@ -166,8 +166,8 @@ int main(void) {
     // printf("index = %d\n", z);
     
     codificar(frase, codificacao);
-    printf("Frase = %s\n", frase);
-    printf("Codificacao: \n%s\n", codificacao);
+    printf("Frase = \"%s\"\n", frase);
+    printf("Codificacao: %s\n", codificacao);
 
     gravarCodificacao(codificacao);
 
@@ -182,14 +182,14 @@ void gravarCodificacao(char *cod) {
     //printf("tamanho = %d\n", TL); system("pause");
 
     for (int i = 0; i < TL;) {
-        B.bi.b7 = cod[i++];
-        B.bi.b6 = cod[i++];
-        B.bi.b5 = cod[i++];
-        B.bi.b4 = cod[i++];
-        B.bi.b3 = cod[i++];
-        B.bi.b2 = cod[i++];
-        B.bi.b1 = cod[i++];
         B.bi.b0 = cod[i++];
+        B.bi.b1 = cod[i++];
+        B.bi.b2 = cod[i++];
+        B.bi.b3 = cod[i++];
+        B.bi.b4 = cod[i++];
+        B.bi.b5 = cod[i++];
+        B.bi.b6 = cod[i++];
+        B.bi.b7 = cod[i++];
 
         fwrite(&(B.num), sizeof(Byte), 1, ptr);
         //printf("Byte em dec = %d\n", B.num);
