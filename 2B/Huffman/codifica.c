@@ -80,6 +80,7 @@ Huff *criaNoHuff(int freq, int simb);
 //Huffman
 void gerarArvoreHuffman(Huff **raiz, Forest **forest);
 void exibeHuff(Huff *raiz, ListR *, int *);
+void exibeHuffIterativa(Huff *raiz, ListR *lista);
 void completarCodigos(Huff *arv, ListR *lista);
 void codigo(Huff *arv, ListR *lista, int*, char*);
 
@@ -146,6 +147,7 @@ int main(void) {
     gerarArvoreHuffman(&arv, &forest);
     n = -1;
     exibeHuff(arv, lista, &n);
+    exibeHuffIterativa(arv, lista);
 
     k = -1;
     codigo(arv, lista, &k, bin);
@@ -417,6 +419,88 @@ void exibeHuff(Huff *raiz, ListR *lista, int *n) {
         (*n)--;
     }
 }
+
+void exibeHuffIterativa(Huff *raiz, ListR *lista) {
+    int i = 1, aux = 1, nivel = 0;
+    Pilha P;
+    inicializaPilha(&P);
+
+    printf("Arvore de Huffman: \n");
+    
+    while(raiz != NULL || !pilhaVazia(P)) {
+        if (raiz == NULL) {
+            pop(&P, &raiz);
+            i--;
+            nivel = i;
+            if (raiz != NULL) {
+                for (int j = 0; j < 5 * nivel; j++) { printf(" "); }
+                if (raiz->simbolo == 0) {
+                    printf("(0,%d)\n", raiz->frequencia);
+                } else {
+                    printf("(\"%s\",%d)\n", retornaPalavra(lista, raiz->simbolo), raiz->frequencia);
+                }
+            }            
+            raiz = raiz->esq;
+            i++;
+
+            if (raiz != NULL) {
+                aux++;
+            } else {
+                i = i - aux;
+                aux = 1;
+            }
+        } else {
+            nivel = i;
+            push(&P, raiz);
+            raiz = raiz->dir;
+            i++;
+        }
+
+    }
+}
+
+// int nivel(Tree *t, int info) {
+//     Tree *raiz = t;
+//     Pilha P;
+//     int i = 1, nivel = 0, aux = 1;
+
+//     inicializaPilha(&P);
+
+//     while(raiz != NULL || !pilhaVazia(&P)) {
+//         if (raiz == NULL) { //Cheguei no max esquerda
+//             pop(&P, &raiz); //Volto para o pai
+//             i--;
+
+//             if (raiz->info == info) {
+//                 nivel = i;
+//             }
+
+//             raiz = raiz->dir; //Vou para a direita
+//             i++;
+
+//             // Ao ir para a direita, se o no existir, precisa se controlar
+//             //  quantos niveis serão descidos, para que os mesmo sejam
+//             //  subtraidos no proximo pop(dir == NULL). 
+//             if (raiz != NULL) {
+//                 aux++;
+//             } else {
+//                 //Quando NULL vier da direita pop subtrai n(aux) direitas
+//                 i = i - aux;
+//                 aux = 1;
+//             }
+//         }
+//         else {
+//             if (raiz->info == info) {
+//                 nivel = i;
+//             }
+//             push(&P, raiz);
+//             raiz = raiz->esq;
+//             i++;
+//         }
+//     }
+
+//     return nivel;
+// }
 
 Forest *criaNoForest(Huff *arv) {
     Forest *forest = (Forest*)malloc(sizeof(Forest));

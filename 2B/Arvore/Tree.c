@@ -251,9 +251,24 @@ Tree *Pai(Tree *t, int info) {
     return pai;
 }
 
+void exibir(Tree *arv, int *n) {
+    if (arv != NULL) {
+        if((*n) == -1) {
+            printf("Arvore: \n");
+        }
+        (*n)++;
+        exibir(arv->dir, n);
+        for(int i = 0; i < 5 * (*n); i++) {printf(" ");}
+        printf("(%d)\n", arv->info);
+        exibir(arv->esq, n);
+        (*n)--;
+    }
+}
+
 //6308846
 int main() {
     Tree *t = NULL, *pai = NULL;
+    int i = -1;
 
     inicializaArv(&t);
     //printf("%d\n", arvVazia(t));
@@ -274,10 +289,11 @@ int main() {
     insereArv(&t, 99, 40, 'D');
     insereArv(&t, 65, 10, 'D');
     insereArv(&t, 70, 65, 'D');
-    printf("%d\n", nivel(t, 50));
-    printf("%d\n", nivel(t, 60));
-    printf("%d\n", nivel(t, 99));
-    printf("%d\n", nivel(t, 70));
+    exibir(t, &i);
+    printf("Nivel 50 = %d\n", nivel(t, 50));
+    printf("Nivel 60 = %d\n", nivel(t, 60));
+    printf("Nivel 99 = %d\n", nivel(t, 99));
+    printf("Nivel 70 = %d\n", nivel(t, 70));
     Order1(t);
     puts("");
     Order2(t);
