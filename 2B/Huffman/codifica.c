@@ -420,8 +420,10 @@ void exibeHuff(Huff *raiz, ListR *lista, int *n) {
     }
 }
 
+//Quando vai para esquerda e encontra uma raiz com dois filhos
+//  ta printando no mesmo nivel que o pai...
 void exibeHuffIterativa(Huff *raiz, ListR *lista) {
-    int i = 1, aux = 1, nivel = 0;
+    int i = 0, aux = 1, nivel = 0;
     Pilha P;
     inicializaPilha(&P);
 
@@ -458,7 +460,16 @@ void exibeHuffIterativa(Huff *raiz, ListR *lista) {
 
     }
 }
-
+//3) Verificar qual o nível (ou profundidade) de um dado nó.
+//Arvore comum, precisa percorrer ela por inteiro
+//Estratégia: Esq e Dir adicionam um ao contador.
+//            Pop retira um do contador. Pois a raiz estará em NULL.
+//            Se percorrer mais de uma vez para direita
+//              é necessario contar os nives e remove-los
+//              quando uma das direitas for nula.
+//              Isso ocorre devido a maneira a qual a logica percorre
+//              o codigo, os nos da direita só ficam um ciclo dentro
+//              da pilha.
 // int nivel(Tree *t, int info) {
 //     Tree *raiz = t;
 //     Pilha P;
@@ -498,7 +509,6 @@ void exibeHuffIterativa(Huff *raiz, ListR *lista) {
 //             i++;
 //         }
 //     }
-
 //     return nivel;
 // }
 
