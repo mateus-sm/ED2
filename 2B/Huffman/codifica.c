@@ -96,9 +96,6 @@ void codificar(char *frase, char *codigo);
 //Arquivo
 void gravarCodificacao(char *cod);
 
-//Conferir tamanho do texto 
-//Funçoes Exibir Arvore e Recuperar codigos retificar
-
 int main(void) {
     ListR *lista = NULL;
     Forest *forest = NULL;
@@ -147,7 +144,7 @@ int main(void) {
     gerarArvoreHuffman(&arv, &forest);
     n = -1;
     exibeHuff(arv, lista, &n);
-    exibeHuffIterativa(arv, lista);
+    //exibeHuffIterativa(arv, lista);
 
     k = -1;
     codigo(arv, lista, &k, bin);
@@ -460,57 +457,6 @@ void exibeHuffIterativa(Huff *raiz, ListR *lista) {
 
     }
 }
-//3) Verificar qual o nível (ou profundidade) de um dado nó.
-//Arvore comum, precisa percorrer ela por inteiro
-//Estratégia: Esq e Dir adicionam um ao contador.
-//            Pop retira um do contador. Pois a raiz estará em NULL.
-//            Se percorrer mais de uma vez para direita
-//              é necessario contar os nives e remove-los
-//              quando uma das direitas for nula.
-//              Isso ocorre devido a maneira a qual a logica percorre
-//              o codigo, os nos da direita só ficam um ciclo dentro
-//              da pilha.
-// int nivel(Tree *t, int info) {
-//     Tree *raiz = t;
-//     Pilha P;
-//     int i = 1, nivel = 0, aux = 1;
-
-//     inicializaPilha(&P);
-
-//     while(raiz != NULL || !pilhaVazia(&P)) {
-//         if (raiz == NULL) { //Cheguei no max esquerda
-//             pop(&P, &raiz); //Volto para o pai
-//             i--;
-
-//             if (raiz->info == info) {
-//                 nivel = i;
-//             }
-
-//             raiz = raiz->dir; //Vou para a direita
-//             i++;
-
-//             // Ao ir para a direita, se o no existir, precisa se controlar
-//             //  quantos niveis serão descidos, para que os mesmo sejam
-//             //  subtraidos no proximo pop(dir == NULL). 
-//             if (raiz != NULL) {
-//                 aux++;
-//             } else {
-//                 //Quando NULL vier da direita pop subtrai n(aux) direitas
-//                 i = i - aux;
-//                 aux = 1;
-//             }
-//         }
-//         else {
-//             if (raiz->info == info) {
-//                 nivel = i;
-//             }
-//             push(&P, raiz);
-//             raiz = raiz->esq;
-//             i++;
-//         }
-//     }
-//     return nivel;
-// }
 
 Forest *criaNoForest(Huff *arv) {
     Forest *forest = (Forest*)malloc(sizeof(Forest));

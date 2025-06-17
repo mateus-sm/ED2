@@ -9,6 +9,7 @@ struct tree {
 typedef struct tree Tree;
 
 #include "pilha.h"
+#include "fila.h"
 
 //Inicializar uma árvore binária;
 void inicializaArv(Tree **t) {
@@ -186,6 +187,38 @@ void Order3(Tree *t) {
     }
 }
 
+void listaDupla(Tree **t) {
+    Tree *raiz = *t, *lista = NULL, *ant = NULL;
+    Pilha P1, P2;
+    inicializaPilha(&P1);
+    inicializaPilha(&P2);
+
+    push(&P1, raiz);
+    while(!pilhaVazia(&P1)) {
+        pop(&P1, &raiz);
+        
+        if (raiz != NULL) {
+            push(&P2, raiz);
+            push(&P1, raiz->esq);
+            push(&P1, raiz->dir);
+        }
+    }
+    
+    while(!pilhaVazia(&P2)) {
+        pop(&P2, &raiz); 
+        raiz->esq = raiz->dir = NULL;
+
+        if (lista == NULL) {
+            lista = raiz;
+            ant = lista;
+        } else {
+            ant->dir = raiz;
+            raiz->esq = ant;
+            ant = raiz;
+        }
+    }
+}
+
 //Retornar o pai de um dado nó.
 //Estratégia: toda vez que for pra esq ou dir verificar o atual com o prox
 //Percorrer arvore por completo pois não há ordenação
@@ -260,8 +293,214 @@ void exibirABB(Tree *arv, int *n) {
     }
 }
 
+void exclusao(Tree **raiz, Tree *e, Tree *pai, char lado) {
+    Tree *paisub, *sub;
+    int aux;
+
+    if (e->esq == NULL && e->dir == NULL) { //Folha?
+        if (e != pai) { //Arvore tem mais que um nó?
+            if (e->info > pai->info) {
+                pai->dir = NULL;
+            } else {
+                pai->esq = NULL;
+            }
+        } else {
+            *raiz = NULL;
+        }
+        free(e);
+    } else { //Tem um ou mais filhos
+        if (e->esq == NULL || e->dir == NULL) { // Tem um filho
+            if(e != pai) {
+                if (e->info < pai->info) {
+                    if (e->esq != NULL) {
+                        pai->esq = e->esq;
+                    } else {
+                        pai->esq = e->dir;
+                    }
+                } else {
+                    if(e->esq != NULL) {
+                        pai->dir = e->esq;
+                    } else {
+                        pai->dir = e->dir;
+                    }
+                }
+            } else {
+                if (e->esq != NULL) {
+                    *raiz = e->esq;
+                } else {
+                    *raiz = e->dir;
+                }
+            }
+            free(e);
+        } else { // Tem dois filhos
+            if (lado == 'd') {
+                paisub = e;
+                sub = e->dir;
+                while (sub->esq != NULL) {
+                    paisub = sub;
+                    sub = sub->esq;
+                }
+                aux = sub->info;
+                exclusao(&(*raiz), sub, paisub, lado);
+                e->info = aux;                
+            } else {
+                paisub = e;
+                sub = e->esq;
+                while (sub->dir != NULL) {
+                    paisub = sub;
+                    sub = sub->dir;
+                }
+                aux = sub->info;
+                exclusao(&(*raiz), sub, paisub, lado);
+                e->info = aux;
+            }
+        }
+    }
+}
+
+void busca(Tree *raiz, int info, Tree **e, Tree **pai) {
+    *e = *pai = raiz;
+    while(*e != NULL && (*e)->info != info) {
+        *pai = *e;
+        if(info < (*e)->info) {
+            *e = (*e)->esq;
+        } else {
+            *e = (*e)->dir;
+        }
+    }
+}
+
+void quantNo(Tree *t, int *qtd) {
+    Tree *atual = t;
+    Pilha P;
+    inicializaPilha(&P);
+
+    while (atual != NULL || !pilhaVazia(&P)) {
+        if (atual == NULL) {
+            pop(&P, &atual);
+            (*qtd)++;
+            atual = atual->dir;
+        } else {
+            push(&P, atual);
+            atual = atual->esq;
+        }
+    }
+}
+
+void balanceamento(Tree **raiz) {
+    Tree *no = NULL, *e = NULL, *pai = NULL;
+    Fila F;
+    inicializaFila(&F); 
+    int qdir, qesq, fb, aux;
+    
+    if (*raiz != NULL) {
+        //percorre por nivel
+        enqueue(&F, *raiz);
+        while (!filaVazia(&F)) {
+            dequeue(&F, &no);
+            
+            //balancear
+            do {
+                //calcula o fator de balanceamento do elemento
+                qdir = 0;
+                qesq = 0;
+                quantNo(no->dir, &qdir); //printf("pai = %d, dir = %d", no->info, qdir);
+                quantNo(no->esq, &qesq); //printf(" esq = %d", qesq); system("pause");
+                fb = qdir - qesq;
+                
+                //se encaixar no criterio balanceia
+                if (fb > 1 || fb < -1) {
+                    aux = no->info;
+                    
+                    //buscar o menor daquele lado da arvore e substituir pelo excluido
+                    busca(*raiz, aux, &e, &pai);
+                    if (no->esq == NULL) {
+                        no = no->dir;
+                    } else {
+                        if (no->dir == NULL) {
+                            no = no->esq;
+                        }
+                    }
+                    
+                    //excluir o elemento
+                    if (fb > 0) {
+                        exclusao(&*raiz, e, pai, 'd');
+                    } else {
+                        exclusao(&*raiz, e, pai, 'e');
+                    }
+                    
+                    //inserir o elemento de volta
+                    insereArv(&*raiz, aux);
+                }
+                
+            } while (fb > 1 || fb < -1);
+            
+            if (no->esq != NULL) {
+                enqueue(&F, no->esq);
+            } 
+            if (no->dir != NULL) {
+                enqueue(&F, no->dir);
+            }
+        } 
+
+    }
+
+}
+
+void altura(Tree *raiz, int nivel, int *maior) {
+    if (raiz != NULL) {
+        if (nivel > *maior) {
+            *maior = nivel;
+        }
+        altura(raiz->esq, nivel + 1, &*maior);
+        altura(raiz->dir, nivel + 1, &*maior);
+    }
+}
+
+void inserirAVL(Tree **raiz, int info, char*flag) {
+    int fb, fbfilho;
+
+    if(*raiz == NULL) {
+        *raiz = criaNoArv(info);
+        *flag = 1;
+    } else {
+        if (info < (*raiz)->info) {
+            inserirAVL(&(*raiz)->esq, info, &*flag);
+        } else {
+            inserirAVL(&(*raiz)->dir, info, &*flag);
+        }
+
+        if(*flag) {
+            fb = altura((*raiz)->dir->dir) - altura((*raiz)->dir->esq); 
+            if (fb == 2 || fb == -2) {
+                *flag = 0;
+
+                if (fb == 2) {
+                    fbfilho = altura((*raiz)->dir->dir) - altura((*raiz)->dir->esq);
+
+                    if (fbfilho == 1) {
+                        rotacaoEsquerda(&*raiz);
+                    } else {
+                        rotacaoDireita(&(*raiz)->dir);
+                        rotacaoEsquerda(&*raiz);
+                    }
+                } else {
+                    fbfilho = altura((*raiz)->esq->dir) - altura((*raiz)->esq->esq);
+
+                    if (fbfilho == 1) {
+                        rotacaoEsquerda(&*raiz);
+                    } else {
+                        rotacaoDireita(&(*raiz)->dir);
+                        rotacaoEsquerda(&*raiz);
+                    }
+                }
+            }
+        }
+    }
+}
+
 int main() {
-    Tree *t = NULL, *pai = NULL;
+    Tree *t = NULL, *pai = NULL, *e = NULL;
     int n;
 
     inicializaArv(&t);
@@ -280,6 +519,11 @@ int main() {
     insereArvRecusrsivo(&t, 4);
     insereArvRecusrsivo(&t, 8);
     insereArvRecusrsivo(&t, 9);
+    insereArvRecusrsivo(&t, 10);
+    insereArvRecusrsivo(&t, 11);
+    insereArvRecusrsivo(&t, 12);
+    insereArvRecusrsivo(&t, 13);
+    insereArvRecusrsivo(&t, 14);
     
     // printf("%d\n", nivel(t, 5));
     // printf("%d\n", nivel(t, 8));
@@ -292,15 +536,35 @@ int main() {
     Order1(t);
     Order2(t);
     Order3(t);
+    //listaDupla(&t);
+    // while (t->dir != NULL) {
+    //     printf("%d ", t->info);
+    //     t = t->dir;
+    // }
+    // printf("|| ");
+    // while (t != NULL) {
+    //     printf("%d ", t->info);
+    //     t = t->esq;
+    // }
+    // system("pause");
 
     printf("\nAntecessores: \n");
     antecessores(t, 2);
     antecessores(t, 4);
     antecessores(t, 9);
 
+    busca(t, 3, &e, &pai); //printf("e = %d, pai = %d\n", e->info, pai->info); //system("pause");
+    exclusao(&t, e, pai, 'd');
+    n = -1;
+    exibirABB(t, &n);
+    
+    balanceamento(&t);
+    n = -1;
+    exibirABB(t, &n);
+
     // pai = Pai(t, 40);
     // printf("%d\n", pai->info);
-
     system("pause");
+
     return 0;
 }

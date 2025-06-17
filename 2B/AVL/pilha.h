@@ -3,8 +3,6 @@
 #include <string.h>
 
 // Estrutura da pilha
-#define MAX 50
-
 typedef struct pilha {
     int topo;
     Tree *pilha[MAX];
