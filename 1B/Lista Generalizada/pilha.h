@@ -7,7 +7,7 @@
 
 typedef struct pilha {
     int topo;
-    LG *pilha[MAX];  // Armazena ponteiros para LG
+    Gen *pilha[MAX];  // Armazena ponteiros para Gen
 } Pilha;
 
 // --- Protótipos das funções ---
@@ -21,14 +21,14 @@ int pilhaCheia(Pilha *P);
 // Verifica se a pilha está vazia
 int pilhaVazia(Pilha *P);
 
-// Empilha um elemento (ponteiro para LG)
-void push(Pilha *P, LG *elemento);
+// Empilha um elemento (ponteiro para Gen)
+void push(Pilha *P, Gen *elemento);
 
-// Desempilha um elemento (recebe um ponteiro para LG*)
-void pop(Pilha *P, LG **elemento);
+// Desempilha um elemento (recebe um ponteiro para Gen *)
+void pop(Pilha *P, Gen **elemento);
 
 // Retorna o elemento no topo (sem remover)
-LG* topo(Pilha *P);
+Gen * topo(Pilha *P);
 
 // Exibe a pilha (para debug)
 void exibirPilha(Pilha *P);
@@ -47,7 +47,7 @@ int pilhaVazia(Pilha *P) {
     return (P->topo == -1);
 }
 
-void push(Pilha *P, LG *elemento) {
+void push(Pilha *P, Gen *elemento) {
     if (!pilhaCheia(P)) {
         P->pilha[++P->topo] = elemento;
     } else {
@@ -55,7 +55,7 @@ void push(Pilha *P, LG *elemento) {
     }
 }
 
-void pop(Pilha *P, LG **elemento) {
+void pop(Pilha *P, Gen **elemento) {
     if (!pilhaVazia(P)) {
         *elemento = P->pilha[P->topo--];
     } else {
@@ -63,7 +63,7 @@ void pop(Pilha *P, LG **elemento) {
     }
 }
 
-LG* topo(Pilha *P) {
+Gen * topo(Pilha *P) {
     if (!pilhaVazia(P)) {
         return P->pilha[P->topo];
     }
@@ -72,15 +72,15 @@ LG* topo(Pilha *P) {
 
 void exibirPilha(Pilha *P) {
     Pilha temp;
-    LG *elem;
-    
+    Gen *elem;
+
     inicializaPilha(&temp);
-    
+
     printf("\nConteúdo da Pilha:");
     while (!pilhaVazia(P)) {
         pop(P, &elem);
         if (elem->terminal) {
-            printf("\n [Atomo] %s", elem->lista.info);
+            printf("\n [Atomo] %s", elem->no.info);
         } else {
             printf("\n [Lista] Endereço: %p", (void*)elem);
         }
