@@ -277,6 +277,98 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
 // uma  Lista  Generalizadas  L.  A  Lista  Generalizada  possui  os  átomos  em  ordem  e  o 
 // elemento deve ser inserido obedecendo essa ordem. Exemplos de chamada do algoritmo:  insere(&L, “b”, 1); 
 //Não insere, pois já tem o “b”!   insere(&L, “b”, 2);
+void insereAtomo(char info[8], Gen** l) {
+    Gen *aux, *atual, *no, *caixa;
+    int flag = 0;
+
+    caixa = (Gen*)malloc(sizeof(Gen));
+    caixa->terminal = 0;
+    caixa->no.lista.cabeca = NULL;
+    caixa->no.lista.calda = NULL;
+
+    no = (Gen*)malloc(sizeof(Gen));
+    no->terminal = 1;
+    strcpy(no->no.info, info);
+
+    //Trata inserir no primeiro espaço
+    if (atomo(Head(*l))) {
+        atual = (*l)->no.lista.cabeca;
+        if (strcmp(atual->no.info, no->no.info) > 0) {
+            caixa->no.lista.cabeca = atual;
+            caixa->no.lista.calda = Tail((*l));
+
+            (*l)->no.lista.cabeca = no;
+            (*l)->no.lista.calda = caixa;
+            flag = 1;
+        }
+    }
+
+    if (flag == 0) {
+        aux = Tail(*l);
+        //Busca
+        while(aux != NULL && flag == 0) {
+            if (atomo(Head(aux))) {
+                atual = Head(aux);
+            }
+
+            if (strcmp(atual->no.info, no->no.info) > 0) {
+                caixa->no.lista.cabeca = atual;
+                caixa->no.lista.calda = Tail(aux);
+
+                aux->no.lista.cabeca = no;
+                aux->no.lista.calda = caixa;
+                flag = 1;
+            }
+
+            aux = Tail(aux);
+        }  
+    }
+
+}
+
+void insere(Gen** l, char info[8], int nivelAlvo) {
+    //Verificar se ja existe
+    //Se o nivel for maior que 1 precisa 
+    //  recuperar todas as cabeças de sublista
+    //Inserir no local correto
+    Gen *aux = *l;
+    Pilha P, P2;
+    inicializaPilha(&P);
+    inicializaPilha(&P2);
+    int nivel = 1;
+
+    if (nivel == nivelAlvo) {
+        insereAtomo(info, l);
+    } else {
+        while(aux != NULL || !pilhaVazia(&P)) {
+            if (aux == NULL) {
+                pop(&P, &aux);
+                aux = Tail(aux);
+                nivel--;
+            } else {
+                if (!atomo(aux)) {
+                    push(&P, aux);
+                    aux = Head(aux);
+                    if (!atomo(aux)) {
+                        if (nivel == nivelAlvo - 1) { //Captura cabeças de lista
+                            push(&P2, aux);
+                        }
+                        nivel++;
+                    }
+                } else {
+                    //printf("Atomo: %s, nivel %d\n", aux->no.info, nivel);
+                    pop(&P, &aux);
+                    aux = Tail(aux);
+                }
+            }
+        }
+
+        while (!pilhaVazia(&P2)) {
+            pop(&P2, &aux);
+            insereAtomo(info, &aux);
+        }
+    }
+}
 
 int main(void) {
     //Gen *L = NULL;
@@ -290,7 +382,11 @@ int main(void) {
     Gen* lista = construirLista(entrada);
     exibir(lista); //exibirLista(lista); puts("");
     reordena(lista);
-    exibir(lista); 
+    exibir(lista);
+    
+    insere(&lista, "b", 1); //Não insere, pois já tem o “b”!
+    insere(&lista, "b", 2);
+    exibir(lista);
 
     system("pause");
     return 0;
