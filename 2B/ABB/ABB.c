@@ -37,8 +37,6 @@ char arvVazia(Tree *t) {
 // Checar os valores, inserir de acordo com tamanho
 void insereArv(Tree **t, int info) {
     Tree *aux = *t, *ant = NULL;
-    Pilha P;
-    inicializaPilha(&P);
 
     if (*t == NULL) {
         *t = criaNoArv(info);
@@ -391,7 +389,7 @@ void balanceamento(Tree **raiz) {
     Tree *no = NULL, *e = NULL, *pai = NULL;
     Fila F;
     inicializaFila(&F); 
-    int qdir, qesq, fb, aux;
+    int qdir, qesq, fb, aux, n;
     
     if (*raiz != NULL) {
         //percorre por nivel
@@ -402,8 +400,7 @@ void balanceamento(Tree **raiz) {
             //balancear
             do {
                 //calcula o fator de balanceamento do elemento
-                qdir = 0;
-                qesq = 0;
+                qdir = qesq = 0;
                 quantNo(no->dir, &qdir); //printf("pai = %d, dir = %d", no->info, qdir);
                 quantNo(no->esq, &qesq); //printf(" esq = %d", qesq); system("pause");
                 fb = qdir - qesq;
@@ -412,22 +409,14 @@ void balanceamento(Tree **raiz) {
                 if (fb > 1 || fb < -1) {
                     aux = no->info;
                     
-                    //buscar o menor daquele lado da arvore e substituir pelo excluido
+                    //buca o pai do no
                     busca(*raiz, aux, &e, &pai);
-                    if (no->esq == NULL) {
-                        no = no->dir;
-                    } else {
-                        if (no->dir == NULL) {
-                            no = no->esq;
-                        }
-                    }
+                    //Se tver só um filho vai pra ele
+                    no = (no->esq == NULL) ? no->dir : (no->dir == NULL) ? no->esq : no;
                     
                     //excluir o elemento
-                    if (fb > 0) {
-                        exclusao(&*raiz, e, pai, 'd');
-                    } else {
-                        exclusao(&*raiz, e, pai, 'e');
-                    }
+                    if (fb > 0) {exclusao(&*raiz, e, pai, 'd');} 
+                    else {exclusao(&*raiz, e, pai, 'e');}
                     
                     //inserir o elemento de volta
                     insereArv(&*raiz, aux);
@@ -435,16 +424,10 @@ void balanceamento(Tree **raiz) {
                 
             } while (fb > 1 || fb < -1);
             
-            if (no->esq != NULL) {
-                enqueue(&F, no->esq);
-            } 
-            if (no->dir != NULL) {
-                enqueue(&F, no->dir);
-            }
+            if (no->esq != NULL) {enqueue(&F, no->esq);} 
+            if (no->dir != NULL) {enqueue(&F, no->dir);}
         } 
-
     }
-
 }
 
 void altura(Tree *raiz, int nivel, int *maior) {
@@ -454,48 +437,6 @@ void altura(Tree *raiz, int nivel, int *maior) {
         }
         altura(raiz->esq, nivel + 1, &*maior);
         altura(raiz->dir, nivel + 1, &*maior);
-    }
-}
-
-void inserirAVL(Tree **raiz, int info, char*flag) {
-    int fb, fbfilho;
-
-    if(*raiz == NULL) {
-        *raiz = criaNoArv(info);
-        *flag = 1;
-    } else {
-        if (info < (*raiz)->info) {
-            inserirAVL(&(*raiz)->esq, info, &*flag);
-        } else {
-            inserirAVL(&(*raiz)->dir, info, &*flag);
-        }
-
-        if(*flag) {
-            fb = altura((*raiz)->dir->dir) - altura((*raiz)->dir->esq); 
-            if (fb == 2 || fb == -2) {
-                *flag = 0;
-
-                if (fb == 2) {
-                    fbfilho = altura((*raiz)->dir->dir) - altura((*raiz)->dir->esq);
-
-                    if (fbfilho == 1) {
-                        rotacaoEsquerda(&*raiz);
-                    } else {
-                        rotacaoDireita(&(*raiz)->dir);
-                        rotacaoEsquerda(&*raiz);
-                    }
-                } else {
-                    fbfilho = altura((*raiz)->esq->dir) - altura((*raiz)->esq->esq);
-
-                    if (fbfilho == 1) {
-                        rotacaoEsquerda(&*raiz);
-                    } else {
-                        rotacaoDireita(&(*raiz)->dir);
-                        rotacaoEsquerda(&*raiz);
-                    }
-                }
-            }
-        }
     }
 }
 
