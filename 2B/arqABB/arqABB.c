@@ -4,12 +4,17 @@
 struct gravar {
     int info, esq, dir;
 };
-
 typedef struct gravar Gravar;
 
+#define LER(ptr, arq) fread(ptr, sizeof(*(ptr)), 1, arq)
+#define ESCREVER(ptr, arq) fwrite(ptr, sizeof(*(ptr)), 1, arq)
+#define POS_ATUAL(arq) (ftell(arq) / sizeof(Gravar))
+#define GOTO_POS(pos, arq) fseek(arq, pos * sizeof(Gravar), 0)
+#define FIM(arq) fseek(arq, 0, 2)
+
 void criaNoABB(Gravar *rec, int info) {
-    (*rec).info = info;
-    (*rec).esq = (*rec).dir = -1;
+    rec->info = info;
+    rec->esq = rec->dir = -1;
 }
 
 void insereABB(Gravar rec) {
@@ -17,59 +22,53 @@ void insereABB(Gravar rec) {
     Gravar atual;
     int flag, pos;
 
-    fseek(ptr, 0, 2);
-    int TF = ftell(ptr) / sizeof(Gravar); 
-    //printf("TF = %d\n", TF); system("pause");
+    FIM(ptr);
+    int TF = POS_ATUAL(ptr);
     rewind(ptr);
-    
+
     if (TF != 0) {
-        //printf("Arq nao vazio!\n");
-        fread(&atual, sizeof(Gravar), 1, ptr);
-        
+        LER(&atual, ptr);
         flag = 0;
-        do  {
+
+        do {
             if (rec.info > atual.info) {
                 if (atual.dir == -1) {
-                    //Guarda pos atual
-                    pos = (ftell(ptr) / sizeof(Gravar)) - 1;
+                    pos = POS_ATUAL(ptr) - 1;
 
-                    //Grava no fim
-                    fseek(ptr, 0, 2);
-                    fwrite(&rec, sizeof(Gravar), 1, ptr);
+                    FIM(ptr);
+                    ESCREVER(&rec, ptr);
 
-                    //Atualiza pos do fim
-                    atual.dir = (ftell(ptr) / sizeof(Gravar)) - 1;
+                    atual.dir = POS_ATUAL(ptr) - 1;
 
-                    //Volta pra pos e grava a atualização
-                    fseek(ptr, pos * sizeof(Gravar), 0);
-                    fwrite(&atual, sizeof(Gravar), 1, ptr);
+                    GOTO_POS(pos, ptr);
+                    ESCREVER(&atual, ptr);
 
                     flag = 1;
                 } else {
-                    fseek(ptr, atual.dir * sizeof(Gravar), 0);
-                    fread(&atual, sizeof(Gravar), 1, ptr);
+                    GOTO_POS(atual.dir, ptr);
+                    LER(&atual, ptr);
                 }
             } else {
                 if (atual.esq == -1) {
-                    pos = (ftell(ptr) / sizeof(Gravar)) - 1;
+                    pos = POS_ATUAL(ptr) - 1;
 
-                    fseek(ptr, 0, 2);
-                    fwrite(&rec, sizeof(Gravar), 1, ptr);
+                    FIM(ptr);
+                    ESCREVER(&rec, ptr);
 
-                    atual.esq = (ftell(ptr) / sizeof(Gravar)) - 1;
+                    atual.esq = POS_ATUAL(ptr) - 1;
 
-                    fseek(ptr, pos * sizeof(Gravar), 0);
-                    fwrite(&atual, sizeof(Gravar), 1, ptr);
+                    GOTO_POS(pos, ptr);
+                    ESCREVER(&atual, ptr);
+
                     flag = 1;
                 } else {
-                    fseek(ptr, atual.esq * sizeof(Gravar), 0);
-                    fread(&atual, sizeof(Gravar), 1, ptr);
+                    GOTO_POS(atual.esq, ptr);
+                    LER(&atual, ptr);
                 }
             }
-        } while (flag == 0);
+        } while (!flag);
     } else {
-        //printf("Arq vazio!\n");
-        fwrite(&rec, sizeof(Gravar), 1, ptr);
+        ESCREVER(&rec, ptr);
     }
 
     fclose(ptr);
@@ -79,38 +78,28 @@ void exibirArq() {
     FILE *ptr = fopen("arqABB.dat", "rb");
     Gravar rec;
 
-    fread(&rec, sizeof(Gravar), 1, ptr);
-    while(!feof(ptr)) {
+    while (LER(&rec, ptr)) {
         printf("| %2d | %2d | %2d |\n", rec.esq, rec.info, rec.dir);
-        fread(&rec, sizeof(Gravar), 1, ptr);
     }
 
     fclose(ptr);
 }
 
-int main (void) {
+int main(void) {
     FILE *ptr = fopen("arqABB.dat", "wb");
     fclose(ptr);
 
     Gravar rec;
 
-    criaNoABB(&rec, 10);
-    insereABB(rec);
-    criaNoABB(&rec, 12);
-    insereABB(rec);
-    criaNoABB(&rec, 11);
-    insereABB(rec);
-    criaNoABB(&rec, 14);
-    insereABB(rec);
-    criaNoABB(&rec, 8);
-    insereABB(rec);
-    criaNoABB(&rec, 6);
-    insereABB(rec);
-    criaNoABB(&rec, 9);
-    insereABB(rec);
+    criaNoABB(&rec, 10); insereABB(rec);
+    criaNoABB(&rec, 12); insereABB(rec);
+    criaNoABB(&rec, 11); insereABB(rec);
+    criaNoABB(&rec, 14); insereABB(rec);
+    criaNoABB(&rec, 8);  insereABB(rec);
+    criaNoABB(&rec, 6);  insereABB(rec);
+    criaNoABB(&rec, 9);  insereABB(rec);
 
     exibirArq();
-
     system("pause");
     return 0;
 }

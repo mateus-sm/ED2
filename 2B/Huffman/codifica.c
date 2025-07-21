@@ -154,15 +154,17 @@ int main(void) {
     gravarListaR(lista);
     exibirGravar();
 
-    //Teste de função
-    // char codigo[50];
-    // char *palavra = "rato";
-    // int z = 0;
-    // preencheBin(codigo, palavra, &z);
-    // codigo[z] = '\0';
-    // printf("codigo = %s\n", codigo); 
-    // printf("palavra = %s\n", palavra); 
-    // printf("index = %d\n", z);
+    #if 0
+        //Teste de função
+        char codigo[50];
+        char *palavra = "rato";
+        int z = 0;
+        preencheBin(codigo, palavra, &z);
+        codigo[z] = '\0';
+        printf("codigo = %s\n", codigo); 
+        printf("palavra = %s\n", palavra); 
+        printf("index = %d\n", z);
+    #endif
     
     codificar(frase, codificacao);
     printf("Frase = \"%s\"\n", frase);
