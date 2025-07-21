@@ -373,7 +373,7 @@ void inserirIterativo(Tree **raiz, int valor) {
 
         //Enquanto eu tenho elementos e a pilha nao rotacionou
         //printf("\nchamada do %d\n", valor); system("pause");
-		while(!pilhaVazia(&P) && rotacionou != 1) {
+		while(!pilhaVazia(&P) && !rotacionou) {
 			pop(&P, &aux);
 			FB = alturaAVL(aux->dir) - alturaAVL(aux->esq); // ou FB=alturaAVL(&(*aux)->dir)-alturaAVL(&(*aux)->esq);
             //printf("Estou no no %d e o fb e = %d\n", aux->info, FB); 
