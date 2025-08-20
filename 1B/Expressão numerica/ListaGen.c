@@ -22,8 +22,44 @@ typedef struct exp Exp;
 
 #include "pilha.h"
 
+Exp *criaNo(char terminal, Info info);
+void insereNo(Exp *e, Exp *caixa);
+void exibir(Exp *l);
+void gerarListaGen(Exp **e, char *str);
+double resolveFunc(char *func);
+char plana(Exp *e);
 void resolveZero(Exp *e);
 void resolveExp(Exp *e);
+
+int main(void) {
+    //Casos:
+    // Pode ser um numero
+    // Pode ser um sinal + - * /
+    // Pode ser um parenteses ( )
+    // Pode ser uma função
+    //     Função contem virgula
+    char *expressao = "2+(3-5*(pow(2,3)-3)-8)"; //Esperado = -28
+    Exp *e = NULL;
+    
+    gerarListaGen(&e, expressao);
+    exibir(e);
+    //printf("Resultado: %lf\n", resolveFunc("sqrt(8)")); system("pause");
+    
+    resolveExp(e);
+    e->terminal = 'V';
+    exibir(e);
+    puts("");
+    
+    char *expressao2 = "2+3*(5-abs(7-9))+pow(2,3)-sqrt(9)+4*(6/3)"; //Esperado = 24
+    gerarListaGen(&e, expressao2);
+    exibir(e);
+    resolveExp(e);
+    e->terminal = 'V';
+    exibir(e);
+    
+    system("pause");
+    return 0;
+}
 
 Exp *criaNo(char terminal, Info info) {
     Exp *aux = (Exp*)malloc(sizeof(Exp));
@@ -338,34 +374,4 @@ void resolveExp(Exp *e) {
             aux = aux->cauda;
         }
     }
-}
-
-int main(void) {
-    //Casos:
-    // Pode ser um numero
-    // Pode ser um sinal + - * /
-    // Pode ser um parenteses ( )
-    // Pode ser uma função
-    //     Função contem virgula
-    char *expressao = "2+(3-5*(pow(2,3)-3)-8)"; //Esperado = -28
-    Exp *e = NULL;
-    
-    gerarListaGen(&e, expressao);
-    exibir(e);
-    //printf("Resultado: %lf\n", resolveFunc("sqrt(8)")); system("pause");
-    
-    resolveExp(e);
-    e->terminal = 'V';
-    exibir(e);
-    puts("");
-    
-    char *expressao2 = "2+3*(5-abs(7-9))+pow(2,3)-sqrt(9)+4*(6/3)"; //Esperado = 24
-    gerarListaGen(&e, expressao2);
-    exibir(e);
-    resolveExp(e);
-    e->terminal = 'V';
-    exibir(e);
-    
-    system("pause");
-    return 0;
 }

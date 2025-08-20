@@ -33,7 +33,7 @@ Exp * topo(Pilha *P);
 // Exibe a pilha (para debug)
 void exibirPilha(Pilha *P);
 
-// --- Implementações (inline para header-only) ---
+// --- Implementações ---
 
 void inicializaPilha(Pilha *P) {
     P->topo = -1;
