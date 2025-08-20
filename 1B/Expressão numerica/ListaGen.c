@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 
+//#define DEBUG
+
 union reg_info {
     double valor;
     char operador;
@@ -69,14 +71,14 @@ void exibir(Exp* l) {
             pop(&P, &l);
             l = l->cauda;
             if (l != NULL) {
-                printf(", ");   
+                printf(", ");
             } else {
                 printf("]");
             }      
         }
 
     }
-    printf("]\n");
+    printf("\n");
 }
 
 
@@ -88,9 +90,15 @@ void gerarListaGen(Exp **e, char *str) {
     int j;
     inicializaPilha(&p);
 
+    //Do jeito que a logica foi feita é necessairo que 
+    //  nao se comece nenhuma lista de NULL.
+    //Logo eu adiciono 0 + ao inicio das listas.
+    uni.valor = 0;
+    lista = criaNo('V', uni);
     uni.operador = '+';
-    lista = criaNo('O', uni);
+    lista->cauda = criaNo('O', uni);
     *e = lista;
+    lista = lista->cauda;
    
     for (int i = 0; str[i] != '\0'; i++) {
 
@@ -113,9 +121,12 @@ void gerarListaGen(Exp **e, char *str) {
                 push(&p, lista);
                 
                 //Adicionar sublista
+                uni.valor = 0;
+                caixa = criaNo('V', uni);
                 uni.operador = '+';
-                caixa = criaNo('O', uni);
-                lista = lista->cabeca = caixa;
+                caixa->cauda = criaNo('O', uni);
+                lista->cabeca = caixa;
+                lista = caixa->cauda;
             break;
             
             case ')':
@@ -158,14 +169,10 @@ void gerarListaGen(Exp **e, char *str) {
 //     return ret;
 // }
 
-// Pode capturar X e Y desse jeito?
-// O valor é pra ser int ou double
-// Pode fazer retorno por if
-// É pra contemplar mais de uma casa decimal?
 double resolveFunc(char *func) {
     char nome[10];
     int i, j = 0;
-    double x, y, ret;
+    double x, y = 0;
 
     for (i = 0; func[i] != '('; i++) {
         nome[j++] = func[i];
@@ -174,26 +181,28 @@ double resolveFunc(char *func) {
     nome[j] = '\0'; //printf("%s\n", nome); system("pause");
         
     x = func[++i] - '0';
-    y = func[i + 2] - '0';
+    if (func[i + 1] != ')') {
+        y = func[i + 2] - '0';
+    }
     
     if (strcmp(nome, "pow") == 0) {
         return pow(x, y);
     }
 
-    if (strcmp(nome, "sqrt") == 0) {
-        return sqrt(x);
+    else if (strcmp(nome, "sqrt") == 0) {
+        return sqrt(x - y);
     }
 
-    if (strcmp(nome, "abs") == 0) {
-        return abs(x);
+    else if (strcmp(nome, "abs") == 0) {
+        return abs(x - y);
     }
 
-    if (strcmp(nome, "sin") == 0) {
-        return sin(x);
+    else if (strcmp(nome, "sin") == 0) {
+        return sin(x - y);
     }
 
-    if (strcmp(nome, "cos") == 0) {
-        return cos(x);
+    else if (strcmp(nome, "cos") == 0) {
+        return cos(x - y);
     }
 }
 
@@ -237,6 +246,11 @@ void resolveZero(Exp *e) {
         aux->info.valor = aux->cabeca->info.valor;
         //printf("%.2lf", aux->info.valor); getchar();
         free(aux->cabeca);
+        aux->cabeca = NULL;
+
+        #ifdef DEBUG
+            exibir(e);
+        #endif
     }
 }
 
@@ -248,90 +262,80 @@ void resolveExp(Exp *e) {
     if (!plana(aux)) {
         resolveZero(aux);
     }
+
+    #ifdef DEBUG
+        exibir(e);
+    #endif
     
-    ant = aux;
-    aux = aux->cauda;
+    //Primeiro resolve-se as funçoes
+    aux = e;
+    while (aux != NULL) {
+        if (aux->terminal == 'F') {
+            aux->terminal = 'V';
+            aux->info.valor = resolveFunc(aux->info.func);
+            
+            #ifdef DEBUG
+                exibir(e);
+            #endif
+        }
+        aux = aux->cauda;
+    }
+
+    //Multiplicações e divisoes
+    ant = e;
+    aux = ant->cauda;
     while (aux != NULL) {
         //printf("%c\n", aux->terminal);
-        switch (aux->terminal) {
-            case 'O': // Precisa resolver para operadores em sequencia??
-                switch (aux->info.operador) {
-                    case '*':
-                        ant->info.valor *= aux->cauda->info.valor;
-                        ant->cauda = aux->cauda->cauda;
-                        free(aux->cauda);
-                        free(aux);
-                        ant = aux;
-                        aux = ant->cauda; 
-                    break;
-
-                    case '/':
-                        ant->info.valor /= aux->cauda->info.valor;
-                        ant->cauda = aux->cauda->cauda;
-                        free(aux->cauda);
-                        free(aux);
-                        ant = aux;
-                        aux = ant->cauda;
-                    break;
-
-                    default:
-                        ant = aux;
-                        aux = aux->cauda;
-                    break;
+        if (aux->terminal == 'O') {
+            if (aux->info.operador == '*' || aux->info.operador == '/') {
+                if (aux->info.operador == '/') {
+                    ant->info.valor /= aux->cauda->info.valor;
+                } else {
+                    ant->info.valor *= aux->cauda->info.valor;
                 }
-            break;
-
-            case 'F':
-                aux->terminal = 'V';
-                aux->info.valor = resolveFunc(aux->info.func);
-                //printf("%.2lf", aux->info.valor); getchar();
-            break;
-
-            default:
+                ant->cauda = aux->cauda->cauda;
+                free(aux->cauda);
+                free(aux);
+                aux = ant->cauda;
+                
+                #ifdef DEBUG
+                    exibir(e);
+                #endif
+            } else {
                 ant = aux;
                 aux = aux->cauda;
-            break;
+            }
+        } else {
+            ant = aux;
+            aux = aux->cauda;
         }
     }
 
+    //Somas e subtrações
     ant = e;
     aux = ant->cauda;
-    printf("%.2lf", aux->info.valor); getchar(); //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     while (aux != NULL) {
-        switch (aux->terminal) {
-            case 'O': // Precisa resolver para operadores em sequencia??
-                switch (aux->info.operador) {
-                    case '+':
-                        ant->info.valor += aux->cauda->info.valor;
-                        ant->cauda = aux->cauda->cauda;
-                        free(aux->cauda);
-                        free(aux);
-                        ant = aux;
-                        aux = ant->cauda; 
-                    break;
-                    
-                    case '-':
-                        ant->info.valor -= aux->cauda->info.valor;
-                        ant->cauda = aux->cauda->cauda;
-                        free(aux->cauda);
-                        free(aux);
-                        ant = aux;
-                        aux = ant->cauda; 
-                    break;
+        if (aux->terminal =='O') { 
+            if (aux->info.operador == '+' || aux->info.operador == '-') {
+                if (aux->info.operador == '+') {
+                    ant->info.valor += aux->cauda->info.valor;
+                } else {
+                    ant->info.valor -= aux->cauda->info.valor;
                 }
-            break;
+                ant->cauda = aux->cauda->cauda;
+                free(aux->cauda);
+                free(aux);
+                aux = ant->cauda; 
 
-            default:
-                ant = aux;
-                aux = aux->cauda;
-            break;
-
-            // case 'V':
-            //     resultado += aux->info.valor;
-            //     free(aux);
-            //     pop(&p, &aux);
-            //     //printf("%.2lf", resultado); getchar();
-            // break;
+                #ifdef DEBUG
+                    exibir(e);
+                #endif
+            } else {
+                //Em teoria nao é pra ter operadores alem de + e -
+            }
+        } else {
+            ant = aux;
+            aux = aux->cauda;
         }
     }
 }
@@ -343,17 +347,25 @@ int main(void) {
     // Pode ser um parenteses ( )
     // Pode ser uma função
     //     Função contem virgula
-    char *expressao = "2+(3-5*(pow(2,3)-3)-8)";
+    char *expressao = "2+(3-5*(pow(2,3)-3)-8)"; //Esperado = -28
     Exp *e = NULL;
-
+    
     gerarListaGen(&e, expressao);
     exibir(e);
     //printf("Resultado: %lf\n", resolveFunc("sqrt(8)")); system("pause");
-    e->terminal = 'V';
+    
     resolveExp(e);
+    e->terminal = 'V';
     exibir(e);
-
+    puts("");
+    
+    char *expressao2 = "2+3*(5-abs(7-9))+pow(2,3)-sqrt(9)+4*(6/3)"; //Esperado = 24
+    gerarListaGen(&e, expressao2);
+    exibir(e);
+    resolveExp(e);
+    e->terminal = 'V';
+    exibir(e);
+    
     system("pause");
-
     return 0;
 }
