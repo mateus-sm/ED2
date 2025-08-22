@@ -370,6 +370,136 @@ void insere(Gen** l, char info[8], int nivelAlvo) {
     }
 }
 
+// 3) Faça um algoritmo para excluir os átomos de um dado nível de Lista. Observe que os 
+//          nodos de Lista que apontam para os átomos também são excluídos! 
+void excluiNivel(Gen *l, int nivelAlvo) {
+    Gen *aux = l, *aux2, *exc;
+    Pilha p1, p2, p3;
+    inicializaPilha(&p1);
+    inicializaPilha(&p2);
+    inicializaPilha(&p3);
+    int nivel = 1;
+
+
+    while(aux != NULL || !pilhaVazia(&p1)) {
+        if (aux == NULL) {
+            pop(&p1, &aux);
+            aux = Tail(aux);
+            nivel--;
+        } else {
+            if (!atomo(aux)) {
+                push(&p1, aux);
+                if (!atomo(Head(aux)) && nivel == nivelAlvo - 1) {
+                    push(&p2, aux);
+                }
+                aux = Head(aux);
+                if (!atomo(aux)) {
+                    nivel++;
+                }
+            } else {
+                pop(&p1, &aux);
+                aux = Tail(aux);
+            }
+        }
+    }
+
+    inicializaPilha(&p1);
+    while(!pilhaVazia(&p2)) {
+        pop(&p2, &aux2);
+        aux = Head(aux2);
+
+        while (aux != NULL) {
+            if (atomo(Head(aux))) {
+                exc = aux;
+                aux = Tail(aux);
+                free(Head(exc));
+                free(exc);
+            } else {
+                push(&p3, aux);
+                aux = Tail(aux);
+            }
+        }
+
+        while(!pilhaVazia(&p3)) {
+            pop(&p3, &aux);
+            push(&p1, aux);
+        }
+
+        pop(&p1, &aux);
+        aux2->no.lista.cabeca = aux;
+        aux2 = Head(aux2);
+        while(!pilhaVazia(&p1)) {
+            pop(&p1, &aux);
+            aux2->no.lista.calda = aux;
+            aux2 = Tail(aux2);
+        }
+    }
+}
+
+Gen* limpaFileira(Gen* l) {
+    Gen *cabeca = l, *aux = l, *ant;
+
+    while (cabeca->no.lista.cabeca) {
+        cabeca = Tail(cabeca);
+    }
+
+    if (cabeca) {
+        while(aux != NULL) {
+            if (aux->no.lista.cabeca == NULL) {
+                ant = aux;
+                aux = Tail(aux);
+                free(ant);
+            } else {
+                aux = Tail(aux);
+            }
+        }
+    }
+
+    return cabeca;
+}
+
+//4) Faça um algoritmo que exclua todos os nodos de Lista que apontam para Lista Nula.
+void excluirNulo(Gen **l) {
+    Gen *aux;
+    Pilha p, p2;
+    inicializaPilha(&p);
+    inicializaPilha(&p2);
+
+    if (*l != NULL) {
+        *l = limpaFileira(*l);
+        aux = *l;
+
+        while(aux != NULL || !pilhaVazia(&p)) {
+            if (aux == NULL) {
+                pop(&p, &aux);
+                aux = Tail(aux);
+            } else {
+                if (!atomo(aux)) {
+                    push(&p, aux);
+                    aux = Head(aux);
+                    if (aux != NULL) {
+                        push(&p2, aux);
+                    }
+                } else {
+                    pop(&p, &aux);
+                    aux = Tail(aux);
+                }
+            }
+        }
+
+        
+        
+        while (!pilhaVazia(&p2)) {
+            pop(&p2, &aux);
+            aux->no.lista.cabeca = limpaFileira(aux->no.lista.cabeca);
+        }
+    }
+
+    //LimpaFileira -> retorna ponteiro pra conectar na cabeça de lista
+    //Guarda cabeças de sublista
+    //Liga cabeça a Fileira
+}
+
 int main(void) {
     //Gen *L = NULL;
     // L = (Gen*)malloc(sizeof(Gen));
@@ -377,7 +507,7 @@ int main(void) {
     // exibir(L);
     // puts("");
     
-    char* entrada = "[x, a, [c, d], [e, a, [f]], b]";
+    char* entrada = "[x, a, [c, d], [], [e, a, [f]], b]";
     //char* teste = "[]"; printf("%d", strlen(teste)); 
     Gen* lista = construirLista(entrada);
     exibir(lista); //exibirLista(lista); puts("");
@@ -386,6 +516,12 @@ int main(void) {
     
     insere(&lista, "b", 1); //Não insere, pois já tem o “b”!
     insere(&lista, "b", 2);
+    exibir(lista);
+
+    excluiNivel(lista, 2);
+    exibir(lista);
+
+    excluirNulo(&lista);
     exibir(lista);
 
     system("pause");
