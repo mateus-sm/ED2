@@ -437,19 +437,25 @@ void excluiNivel(Gen *l, int nivelAlvo) {
 }
 
 Gen* limpaFileira(Gen* l) {
-    Gen *cabeca = l, *aux = l, *ant;
+    Gen *cabeca = l, *aux, *ant;
 
-    while (cabeca->no.lista.cabeca) {
+    while (cabeca != NULL && Head(cabeca) == NULL) {
+        aux = cabeca;
         cabeca = Tail(cabeca);
+        free(aux);
     }
 
-    if (cabeca) {
-        while(aux != NULL) {
-            if (aux->no.lista.cabeca == NULL) {
-                ant = aux;
-                aux = Tail(aux);
-                free(ant);
+    ant = cabeca;
+    if (cabeca != NULL) {
+        aux = Tail(cabeca);
+
+        while (aux != NULL) {
+            if (Head(aux) == NULL) {
+                ant->no.lista.calda = Tail(aux);
+                free(aux);
+                aux = Tail(ant);
             } else {
+                ant = aux;
                 aux = Tail(aux);
             }
         }
@@ -458,17 +464,15 @@ Gen* limpaFileira(Gen* l) {
     return cabeca;
 }
 
+
 //4) Faça um algoritmo que exclua todos os nodos de Lista que apontam para Lista Nula.
 void excluirNulo(Gen **l) {
-    Gen *aux;
+    Gen *aux = *l, *aux2;
     Pilha p, p2;
     inicializaPilha(&p);
     inicializaPilha(&p2);
 
     if (*l != NULL) {
-        *l = limpaFileira(*l);
-        aux = *l;
-
         while(aux != NULL || !pilhaVazia(&p)) {
             if (aux == NULL) {
                 pop(&p, &aux);
@@ -476,9 +480,10 @@ void excluirNulo(Gen **l) {
             } else {
                 if (!atomo(aux)) {
                     push(&p, aux);
+                    aux2 = aux;
                     aux = Head(aux);
-                    if (aux != NULL) {
-                        push(&p2, aux);
+                    if (!atomo(aux) && !nula(aux)) {
+                        push(&p2, aux2);
                     }
                 } else {
                     pop(&p, &aux);
@@ -487,7 +492,7 @@ void excluirNulo(Gen **l) {
             }
         }
 
-        
+        *l = limpaFileira(*l);
         
         while (!pilhaVazia(&p2)) {
             pop(&p2, &aux);
@@ -521,7 +526,7 @@ int main(void) {
     excluiNivel(lista, 2);
     exibir(lista);
 
-    excluirNulo(&lista);
+    excluirNulo(&lista); // Precisa chamar mais uma vez
     exibir(lista);
 
     system("pause");
