@@ -20,6 +20,14 @@ struct gen {
 
 typedef struct gen Gen;
 
+struct fila {
+    char elem[8];
+    int prioridade;
+    struct fila *prox;
+};
+
+typedef struct fila Fila;
+
 #include "pilha.h"
 
 char nula(Gen *l) {
@@ -505,6 +513,127 @@ void excluirNulo(Gen **l) {
     //Liga cabeça a Fileira
 }
 
+//5:-)  Faça  um  algoritmo  que  transforme  uma  Lista  Generalizada em  uma Fila  com 
+// prioridade, sendo que cada nível dos nodos de Lista corresponde a um nível de prioridade. 
+Fila *criaNo(char elem[8], int prioridade) {
+    Fila *novo = (Fila *)malloc(sizeof(Fila));
+    strcpy(novo->elem, elem);
+    novo->prioridade = prioridade;
+    novo->prox = NULL;
+    return novo;
+}
+
+void insereFila(Fila **inicio, char elem[8], int prioridade) {
+    Fila *novo = criaNo(elem, prioridade);
+    Fila *atual = *inicio;
+
+    if (*inicio == NULL || prioridade < (*inicio)->prioridade) {
+        novo->prox = *inicio;
+        *inicio = novo;
+    } else {
+        while (atual->prox != NULL && atual->prox->prioridade <= prioridade) {
+            atual = atual->prox;
+        }
+        novo->prox = atual->prox;
+        atual->prox = novo;
+    }
+}
+
+void imprimeFila(Fila *inicio) {
+    Fila *p = inicio;
+    while (p != NULL) {
+        printf("(%s, %d) ", p->elem, p->prioridade);
+        p = p->prox;
+    }
+    printf("\n");
+}
+
+void criaFila(Gen *lista, Fila **f) {
+    int nivel = 1;
+    Pilha p;
+    inicializaPilha(&p);
+
+    while(lista != NULL || !pilhaVazia(&p)) {
+        if (lista == NULL) {
+            pop(&p, &lista);
+            lista = Tail(lista);
+            nivel--;
+        } else {
+            if (!atomo(lista)) {    
+                push(&p, lista);
+                if (atomo(Head(lista))) {
+                    insereFila(f, lista->no.lista.cabeca->no.info, nivel);
+                }
+                lista = Head(lista);
+                if (!atomo(lista)) {
+                    nivel++;
+                }
+            } else {
+                pop(&p, &lista);
+                lista = Tail(lista);
+            }
+        }
+    }
+}
+
+//6:-)  Faça  um  algoritmo  que  coloque  todos  os  átomos  de  uma  Lista  
+// Generalizada  L  no bottom-level.
+void botton(Gen* lista) {
+    int nivel = 1, maior = 0;
+    Gen *l = lista, *aux;
+    Pilha p;
+    inicializaPilha(&p);
+
+    while(!nula(l) || !pilhaVazia(&p)) {
+        if (nula(l)) {
+            pop(&p, &l);
+            l = Tail(l);
+            nivel--;
+        } else {
+            if (!atomo(l)) {
+                push(&p, l);
+                l = Head(l);
+                if (!atomo(l)) {
+                    nivel++;
+                    maior = (nivel > maior) ? nivel : maior;
+                }
+            } else {
+                pop(&p, &l);
+                l = Tail(l);
+            }
+        }
+    }
+
+    nivel = 1;
+    l = lista;
+    while(!nula(l) || !pilhaVazia(&p)) {
+        if (nula(l)) {
+            pop(&p, &l);
+            l = Tail(l);
+            nivel--;
+        } else {
+            if (!atomo(l)) {
+                push(&p, l);
+
+                if (atomo(Head(l)) && nivel < maior) {
+                    aux = l;
+                    for (int i = nivel; i < maior; i++) {
+                        aux->no.lista.cabeca = cons(aux->no.lista.cabeca, NULL);
+                        aux = Head(aux);
+                    }
+                }
+
+                l = Head(l);
+                if (!atomo(l)) { nivel++; }
+            } else {
+                pop(&p, &l);
+                l = Tail(l);
+            }
+        }
+    }
+}
+
+
 int main(void) {
     //Gen *L = NULL;
     // L = (Gen*)malloc(sizeof(Gen));
@@ -527,6 +656,15 @@ int main(void) {
     exibir(lista);
 
     excluirNulo(&lista); // Precisa chamar mais uma vez
+    excluirNulo(&lista);
+    insere(&lista, "c", 3);
+    exibir(lista);
+    
+    Fila *f = NULL;
+    criaFila(lista, &f);
+    imprimeFila(f);
+    
+    botton(lista);
     exibir(lista);
 
     system("pause");
