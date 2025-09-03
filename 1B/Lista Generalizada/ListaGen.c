@@ -5,7 +5,7 @@
 
 struct reg_lista {
     struct gen *cabeca;
-    struct gen *calda;
+    struct gen *cauda;
 };
 
 union info_lista {
@@ -46,7 +46,7 @@ Gen* Head(Gen *l) {
 
 Gen* Tail(Gen *l) {
     if (!atomo(l) && !nula(l)) {
-        return l->no.lista.calda;
+        return l->no.lista.cauda;
     }
 }
 
@@ -62,7 +62,7 @@ Gen* cons(Gen* H, Gen* T) {
         Gen *l = (Gen*)malloc(sizeof(Gen));
         l->terminal = 0;
         l->no.lista.cabeca = H;
-        l->no.lista.calda = T;
+        l->no.lista.cauda = T;
         return l;
     }
 }
@@ -223,7 +223,7 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
         l = (Gen*)malloc(sizeof(Gen));
         l->terminal = 0;
         l->no.lista.cabeca = NULL;
-        l->no.lista.calda = NULL;
+        l->no.lista.cauda = NULL;
         ret = l;
 
         while(i < TL) {
@@ -232,7 +232,7 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
                     aux = (Gen*)malloc(sizeof(Gen));
                     aux->terminal = 0;
                     aux->no.lista.cabeca = NULL;
-                    aux->no.lista.calda = NULL;
+                    aux->no.lista.cauda = NULL;
                     
                     push(&P, l);
                     
@@ -244,9 +244,9 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
                     aux = (Gen*)malloc(sizeof(Gen));
                     aux->terminal = 0;
                     aux->no.lista.cabeca = NULL;
-                    aux->no.lista.calda = NULL;
+                    aux->no.lista.cauda = NULL;
                     
-                    l->no.lista.calda = aux;
+                    l->no.lista.cauda = aux;
                     l = Tail(l);
                 break;
 
@@ -292,7 +292,7 @@ void insereAtomo(char info[8], Gen** l) {
     caixa = (Gen*)malloc(sizeof(Gen));
     caixa->terminal = 0;
     caixa->no.lista.cabeca = NULL;
-    caixa->no.lista.calda = NULL;
+    caixa->no.lista.cauda = NULL;
 
     no = (Gen*)malloc(sizeof(Gen));
     no->terminal = 1;
@@ -303,10 +303,10 @@ void insereAtomo(char info[8], Gen** l) {
         atual = (*l)->no.lista.cabeca;
         if (strcmp(atual->no.info, no->no.info) > 0) {
             caixa->no.lista.cabeca = atual;
-            caixa->no.lista.calda = Tail((*l));
+            caixa->no.lista.cauda = Tail((*l));
 
             (*l)->no.lista.cabeca = no;
-            (*l)->no.lista.calda = caixa;
+            (*l)->no.lista.cauda = caixa;
             flag = 1;
         }
     }
@@ -321,10 +321,10 @@ void insereAtomo(char info[8], Gen** l) {
 
             if (strcmp(atual->no.info, no->no.info) > 0) {
                 caixa->no.lista.cabeca = atual;
-                caixa->no.lista.calda = Tail(aux);
+                caixa->no.lista.cauda = Tail(aux);
 
                 aux->no.lista.cabeca = no;
-                aux->no.lista.calda = caixa;
+                aux->no.lista.cauda = caixa;
                 flag = 1;
             }
 
@@ -438,7 +438,7 @@ void excluiNivel(Gen *l, int nivelAlvo) {
         aux2 = Head(aux2);
         while(!pilhaVazia(&p1)) {
             pop(&p1, &aux);
-            aux2->no.lista.calda = aux;
+            aux2->no.lista.cauda = aux;
             aux2 = Tail(aux2);
         }
     }
@@ -459,7 +459,7 @@ Gen* limpaFileira(Gen* l) {
 
         while (aux != NULL) {
             if (Head(aux) == NULL) {
-                ant->no.lista.calda = Tail(aux);
+                ant->no.lista.cauda = Tail(aux);
                 free(aux);
                 aux = Tail(ant);
             } else {
@@ -633,6 +633,134 @@ void botton(Gen* lista) {
     }
 }
 
+// 7:-)  Faça  um  algoritmo  utilizando  Listas  Generalizadas  para  manipular  categorias  de 
+// filmes, sendo que cada categoria pode ser composta de nenhuma, uma ou mais 
+// subcategorias. As funções a serem implementadas são:  
+ 
+// inserirCategoria(ListaGen* pai, ListaGen* filho) 
+// Insere a categoria filho como filha da categoria pai. 
+inserirCategoria(Gen* pai, Gen* filho) {
+    Gen *aux = Head(pai);
+    Gen *ant;
+
+    if (aux == NULL) {
+        pai->no.lista.cabeca = filho;
+    } else {
+        ant = aux;
+        aux = Tail(aux);
+        while (aux != NULL && stricmp(ant->no.info, aux->no.info) < 0) {
+            ant = aux;
+            aux = Tail(aux);
+        }
+
+        if (aux == NULL) {
+            ant->no.lista.cauda = filho;
+        } else {
+            ant->no.lista.cauda = filho;
+            filho->no.lista.cauda = aux;
+        }
+    }
+}
+ 
+// retirarCategoria(ListaGen* pai, char* nome); 
+// Retira uma categoria procurando seu nome através da busca a partir de seu pai. 
+ 
+// exibirCategorias(ListaGen* pai) 
+// Exibe a lista de categorias e subcategorias da seguinte maneira (deverá incluir a 
+// tabulação): 
+// Comédia
+//     Policial
+//     Romântica
+// Terror
+//     Zumbi
+//     Vampiro
+// Ação
+//     Aventura
+//         Anime
+//         Militar
+// Ficção Científica
+//     Poderes
+//     Invasão espacial 
+ 
+// procurarCategoria(ListaGen* pai, char* nome) 
+// Retorna a Lista Generalizada filha que se encaixa no parâmetro nome passado.  
+// Exemplo da estrutura: 
+// L  =  [“Comédia”,[“Policial”,”Romântica”]],[“Terror”,[“Zumbi”,Vampiro”]],[“Ação”,[“Aventura”, [“Anime”, 
+// “Militar”]]], [“Ficção Científica”,[“Poderes”, “Invasão espacial”]] 
+
+
+
+//===============================================================================================
+//========================================== Lista 2 ============================================
+//===============================================================================================
+
+// 1:-) Fazer um algoritmo para destruir uma lista generalizada (liberar todos os nodos de uma lista). 
+// Três casos a considerar: 
+// • L tem valor nulo, representando uma lista vazia; 
+// • L aponta um nodo terminal, representando um átomo; 
+// • L aponta um nodo não terminal, representando uma lista generalizada.
+
+void destruir(Gen *l) {
+    Pilha p, p2;
+    inicializaPilha(&p);
+    inicializaPilha(&p2);
+
+    if (l != NULL) {
+        while(l != NULL || !pilhaVazia(&p)) {
+            if (l == NULL){
+                pop(&p, &l);
+                l = Tail(l);
+            } else {
+                push(&p, l);
+                push(&p2, l);
+                l = Head(l);
+            }
+        }
+
+        while (!pilhaVazia(&p2)) {
+            pop(&p2, &l);
+            free(l);
+        }        
+    }
+}
+
+//2:-) Fazer um algoritmo para duplicar uma lista generalizada fornecida por parâmetro.
+Gen * duplicar(Gen *l) {
+    Gen *ret;
+    Pilha p;
+    Pilha p2;
+    inicializaPilha(&p);
+    inicializaPilha(&p2);
+
+    if (l != NULL) {
+        ret = cons(NULL, NULL);
+        push(&p, &l);
+        l = Head(l);
+    }
+
+    if (l != NULL) {
+        while(l != NULL || !pilhaVazia(&p)) {
+            if (l == NULL){
+                pop(&p, &l);
+                l = Tail(l);
+                if (l != NULL) {
+                    ret->no.lista.cauda = cons(NULL, NULL);
+                    ret = Tail(ret);
+                }
+            } else {
+                push(&p, l);
+                if (!atomo(l)) {
+                    ret->no.lista.cabeca = cons(NULL, NULL);
+                    push(&p2, ret);
+                    ret = Head(ret);
+                } else {
+                    ret->no.lista.cabeca = criaT(l->no.info);
+                }
+                l = Head(l);
+            }
+        }
+    }
+}
 
 int main(void) {
     //Gen *L = NULL;
@@ -666,6 +794,19 @@ int main(void) {
     
     botton(lista);
     exibir(lista);
+
+    char *cat = "[“Comédia”,[“Policial”,”Romântica”]],"
+                "[“Terror”,[“Zumbi”,Vampiro”]],"
+                "[“Ação”,[“Aventura”, [“Anime”,“Militar”]]],"
+                "[“Ficção Científica”,[“Poderes”, “Invasão espacial”]]";
+
+    Gen *pai = (Gen*)malloc(sizeof(Gen));
+    pai->terminal = 0;
+    pai->no.lista.cabeca = NULL;
+    pai->no.lista.cauda = NULL;
+
+    Gen *filho = (Gen*)malloc(sizeof(Gen));
+    pai->terminal = 
 
     system("pause");
     return 0;
