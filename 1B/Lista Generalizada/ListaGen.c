@@ -639,7 +639,7 @@ void botton(Gen* lista) {
  
 // inserirCategoria(ListaGen* pai, ListaGen* filho) 
 // Insere a categoria filho como filha da categoria pai. 
-inserirCategoria(Gen* pai, Gen* filho) {
+void inserirCategoria(Gen* pai, Gen* filho) {
     Gen *aux = Head(pai);
     Gen *ant;
 
@@ -726,40 +726,38 @@ void destruir(Gen *l) {
 
 //2:-) Fazer um algoritmo para duplicar uma lista generalizada fornecida por parâmetro.
 Gen * duplicar(Gen *l) {
-    Gen *ret;
+    Gen *ret, *aux;
     Pilha p;
     Pilha p2;
     inicializaPilha(&p);
     inicializaPilha(&p2);
 
-    if (l != NULL) {
-        ret = cons(NULL, NULL);
-        push(&p, &l);
-        l = Head(l);
-    }
+    aux = cons(NULL, NULL);  // raiz da cópia
+    ret = aux;
 
     if (l != NULL) {
-        while(l != NULL || !pilhaVazia(&p)) {
-            if (l == NULL){
-                pop(&p, &l);
-                l = Tail(l);
-                if (l != NULL) {
-                    ret->no.lista.cauda = cons(NULL, NULL);
-                    ret = Tail(ret);
+        push(&p, l);
+        while(!pilhaVazia(&p)) {
+            pop(&p, &l);
+
+            if (l != NULL) {
+                if (Head(l) != NULL) {
+                    if (atomo(Head(l))) {
+                        aux->no.lista.cabeca = criaT(l->no.lista.cabeca->no.info);
+                    } else {
+                        aux->no.lista.cabeca = cons(NULL, NULL);
+                    }
                 }
-            } else {
-                push(&p, l);
-                if (!atomo(l)) {
-                    ret->no.lista.cabeca = cons(NULL, NULL);
-                    push(&p2, ret);
-                    ret = Head(ret);
-                } else {
-                    ret->no.lista.cabeca = criaT(l->no.info);
+                push(&p, Head(l));
+                if (Tail(l) != NULL) {
+                    aux->no.lista.cauda = cons(NULL, NULL);
                 }
-                l = Head(l);
+                push(&p, Tail(l));
             }
         }
     }
+
+    return ret;
 }
 
 int main(void) {
@@ -794,6 +792,10 @@ int main(void) {
     
     botton(lista);
     exibir(lista);
+    
+    Gen* dup = duplicar(lista);
+    exibir(lista);
+    exibir(dup);
 
     char *cat = "[“Comédia”,[“Policial”,”Romântica”]],"
                 "[“Terror”,[“Zumbi”,Vampiro”]],"
