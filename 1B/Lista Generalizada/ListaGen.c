@@ -720,7 +720,7 @@ void destruir(Gen *l) {
         while (!pilhaVazia(&p2)) {
             pop(&p2, &l);
             free(l);
-        }        
+        }
     }
 }
 
@@ -760,6 +760,60 @@ Gen * duplicar(Gen *l) {
     return ret;
 }
 
+// 3:-)  Fazer  um  algoritmo  (função  boolean)  para  comparar  duas  listas  generalizadas  passadas  por 
+// parâmetro.
+char compara(Gen *l, Gen *l2) {
+    char flag = 1;
+    Pilha p, p2, p3, p4;
+    inicializaPilha(&p);
+    inicializaPilha(&p2);
+    inicializaPilha(&p3);
+    inicializaPilha(&p4);
+
+    if (l != NULL) {
+        while(l != NULL || !pilhaVazia(&p)) {
+            if (l == NULL){
+                pop(&p, &l);
+                l = Tail(l);
+            } else {
+                push(&p, l);
+                l = Head(l);
+                if (atomo(l)) { push(&p2, l); }
+            }
+        }
+    }
+
+    if (l2 != NULL) {
+        while(l2 != NULL || !pilhaVazia(&p4)) {
+            if (l2 == NULL){
+                pop(&p4, &l2);
+                l2 = Tail(l2);
+            } else {
+                push(&p4, l2);
+                l2 = Head(l2);
+                if (atomo(l2)) { push(&p3, l2); }
+            }
+        }
+    }
+
+
+    while (!pilhaVazia(&p2) && !pilhaVazia(&p3)) {
+        pop(&p2, &l);
+        pop(&p3, &l2);
+
+        if (strcmp(l->no.info, l2->no.info) != 0) {
+            flag = 0;
+        }
+    }
+    
+    if (!pilhaVazia(&p2) || !pilhaVazia(&p3)) {
+        flag = 0;
+    }
+
+    return flag;
+}
+
+
 int main(void) {
     //Gen *L = NULL;
     // L = (Gen*)malloc(sizeof(Gen));
@@ -770,6 +824,10 @@ int main(void) {
     char* entrada = "[x, a, [c, d], [], [e, a, [f]], b]";
     //char* teste = "[]"; printf("%d", strlen(teste)); 
     Gen* lista = construirLista(entrada);
+    Gen* lista2 = construirLista(entrada);
+
+    printf("Listas %s", compara(lista2, lista) ? "iguais" : "diferentes");
+
     exibir(lista); //exibirLista(lista); puts("");
     reordena(lista);
     exibir(lista);
@@ -793,22 +851,21 @@ int main(void) {
     botton(lista);
     exibir(lista);
     
-    Gen* dup = duplicar(lista);
-    exibir(lista);
-    exibir(dup);
+    // Gen* dup = duplicar(lista);
+    // exibir(lista);
+    // exibir(dup);
 
-    char *cat = "[“Comédia”,[“Policial”,”Romântica”]],"
-                "[“Terror”,[“Zumbi”,Vampiro”]],"
-                "[“Ação”,[“Aventura”, [“Anime”,“Militar”]]],"
-                "[“Ficção Científica”,[“Poderes”, “Invasão espacial”]]";
+    // char *cat = "[“Comédia”,[“Policial”,”Romântica”]],"
+    //             "[“Terror”,[“Zumbi”,Vampiro”]],"
+    //             "[“Ação”,[“Aventura”, [“Anime”,“Militar”]]],"
+    //             "[“Ficção Científica”,[“Poderes”, “Invasão espacial”]]";
 
-    Gen *pai = (Gen*)malloc(sizeof(Gen));
-    pai->terminal = 0;
-    pai->no.lista.cabeca = NULL;
-    pai->no.lista.cauda = NULL;
+    // Gen *pai = (Gen*)malloc(sizeof(Gen));
+    // pai->terminal = 0;
+    // pai->no.lista.cabeca = NULL;
+    // pai->no.lista.cauda = NULL;
 
-    Gen *filho = (Gen*)malloc(sizeof(Gen));
-    pai->terminal = 
+    // Gen *filho = (Gen*)malloc(sizeof(Gen));
 
     system("pause");
     return 0;
