@@ -229,24 +229,14 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
         while(i < TL) {
             switch (str[i]) {
                 case '[':
-                    aux = (Gen*)malloc(sizeof(Gen));
-                    aux->terminal = 0;
-                    aux->no.lista.cabeca = NULL;
-                    aux->no.lista.cauda = NULL;
-                    
                     push(&P, l);
                     
-                    l->no.lista.cabeca = aux;
+                    l->no.lista.cabeca = cons(NULL, NULL);
                     l = Head(l);
                 break;
                 
                 case ',':
-                    aux = (Gen*)malloc(sizeof(Gen));
-                    aux->terminal = 0;
-                    aux->no.lista.cabeca = NULL;
-                    aux->no.lista.cauda = NULL;
-                    
-                    l->no.lista.cauda = aux;
+                    l->no.lista.cauda = cons(NULL, NULL);
                     l = Tail(l);
                 break;
 
@@ -265,11 +255,7 @@ Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
                     info[j] = '\0';
                     i--;
 
-                    aux = (Gen*)malloc(sizeof(Gen));
-                    aux->terminal = 1;
-                    strcpy(aux->no.info, info);
-
-                    l->no.lista.cabeca = aux;
+                    l->no.lista.cabeca = criaT(info);
                 break;
             }
             
@@ -726,36 +712,53 @@ void destruir(Gen *l) {
 
 //2:-) Fazer um algoritmo para duplicar uma lista generalizada fornecida por parâmetro.
 Gen * duplicar(Gen *l) {
-    Gen *ret, *aux;
+    Gen *ret, *aux = NULL;
     Pilha p;
     Pilha p2;
     inicializaPilha(&p);
     inicializaPilha(&p2);
 
-    aux = cons(NULL, NULL);  // raiz da cópia
-    ret = aux;
-
-    if (l != NULL) {
-        push(&p, l);
-        while(!pilhaVazia(&p)) {
+    while(l != NULL || !pilhaVazia(&p)) {
+        if (nula(l)) {
             pop(&p, &l);
-
+            l = Tail(l);
+    
+            pop(&p2, &aux);
             if (l != NULL) {
-                if (Head(l) != NULL) {
-                    if (atomo(Head(l))) {
-                        aux->no.lista.cabeca = criaT(l->no.lista.cabeca->no.info);
+                aux->no.lista.cauda = cons(NULL, NULL);
+                aux = Tail(aux); //Problema esta aqui, tecnicamente uma head a mais
+            }
+        } else {
+            if (!atomo(l)) {
+                push(&p, l);
+                l = Head(l);
+    
+                if (l != NULL) {
+                    if (aux == NULL) {
+                        aux = cons(NULL, NULL);
+                        ret = aux;
+                        push(&p2, aux);
                     } else {
                         aux->no.lista.cabeca = cons(NULL, NULL);
+                        push(&p2, aux);
+                        aux = Head(aux);
                     }
                 }
-                push(&p, Head(l));
-                if (Tail(l) != NULL) {
+            } else {
+                aux->no.lista.cabeca = criaT(l->no.info);
+                pop(&p2, &aux);
+    
+                pop(&p, &l);
+                l = Tail(l);
+    
+                if (l != NULL) {
                     aux->no.lista.cauda = cons(NULL, NULL);
+                    aux = Tail(aux);
                 }
-                push(&p, Tail(l));
             }
         }
     }
+    
 
     return ret;
 }
@@ -776,9 +779,14 @@ char compara(Gen *l, Gen *l2) {
                 pop(&p, &l);
                 l = Tail(l);
             } else {
-                push(&p, l);
-                l = Head(l);
-                if (atomo(l)) { push(&p2, l); }
+                if (!atomo(l)) {
+                    push(&p, l);
+                    l = Head(l);
+                } else { 
+                    push(&p2, l);
+                    pop(&p, &l);
+                    l = Tail(l);
+                }
             }
         }
     }
@@ -789,13 +797,17 @@ char compara(Gen *l, Gen *l2) {
                 pop(&p4, &l2);
                 l2 = Tail(l2);
             } else {
-                push(&p4, l2);
-                l2 = Head(l2);
-                if (atomo(l2)) { push(&p3, l2); }
+                if (!atomo(l2)) {
+                    push(&p4, l2);
+                    l2 = Head(l2);
+                } else { 
+                    push(&p3, l2);
+                    pop(&p4, &l2);
+                    l2 = Tail(l2);
+                }
             }
         }
     }
-
 
     while (!pilhaVazia(&p2) && !pilhaVazia(&p3)) {
         pop(&p2, &l);
@@ -826,7 +838,7 @@ int main(void) {
     Gen* lista = construirLista(entrada);
     Gen* lista2 = construirLista(entrada);
 
-    printf("Listas %s", compara(lista2, lista) ? "iguais" : "diferentes");
+    printf("Listas %s\n", compara(lista2, lista) ? "iguais" : "diferentes");
 
     exibir(lista); //exibirLista(lista); puts("");
     reordena(lista);
@@ -851,9 +863,9 @@ int main(void) {
     botton(lista);
     exibir(lista);
     
-    // Gen* dup = duplicar(lista);
-    // exibir(lista);
-    // exibir(dup);
+    Gen* dup = duplicar(lista);
+    exibir(lista);
+    exibir(dup);
 
     // char *cat = "[“Comédia”,[“Policial”,”Romântica”]],"
     //             "[“Terror”,[“Zumbi”,Vampiro”]],"
