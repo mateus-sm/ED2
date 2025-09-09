@@ -712,7 +712,7 @@ void destruir(Gen *l) {
 
 //2:-) Fazer um algoritmo para duplicar uma lista generalizada fornecida por parâmetro.
 Gen * duplicar(Gen *l) {
-    Gen *ret, *aux = NULL;
+    Gen *ret, *aux = NULL, *lixo;
     Pilha p;
     Pilha p2;
     inicializaPilha(&p);
@@ -726,7 +726,12 @@ Gen * duplicar(Gen *l) {
             pop(&p2, &aux);
             if (l != NULL) {
                 aux->no.lista.cauda = cons(NULL, NULL);
-                aux = Tail(aux); //Problema esta aqui, tecnicamente uma head a mais
+                aux = Tail(aux);
+
+                //Avança uma iteração
+                push(&p, l);
+                l = Head(l);
+                push(&p2, aux);
             }
         } else {
             if (!atomo(l)) {
@@ -741,19 +746,29 @@ Gen * duplicar(Gen *l) {
                     } else {
                         aux->no.lista.cabeca = cons(NULL, NULL);
                         push(&p2, aux);
-                        aux = Head(aux);
+                        aux = Head(aux);                    
                     }
                 }
-            } else {
-                aux->no.lista.cabeca = criaT(l->no.info);
-                pop(&p2, &aux);
-    
+            } else {                
                 pop(&p, &l);
                 l = Tail(l);
-    
+                
+                aux->no.lista.cabeca = criaT(l->no.info);
+                //Tem dois casos, em um deles vc volta "la em cima" para continuar a listagen
+                //no outro voce quer voltar no pai para criar um irmao da sublista
                 if (l != NULL) {
                     aux->no.lista.cauda = cons(NULL, NULL);
                     aux = Tail(aux);
+
+                    //Corrige pilha
+                    pop(&p2, &lixo);
+
+                    //Avança uma iteração
+                    push(&p, l);
+                    l = Head(l);
+                    push(&p2, aux);
+                } else {
+                    pop(&p2, &aux);
                 }
             }
         }
