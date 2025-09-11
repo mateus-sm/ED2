@@ -722,7 +722,7 @@ Gen * duplicar(Gen *l) {
         if (nula(l)) {
             pop(&p, &l);
             l = Tail(l);
-    
+
             pop(&p2, &aux);
             if (l != NULL) {
                 aux->no.lista.cauda = cons(NULL, NULL);
@@ -737,7 +737,7 @@ Gen * duplicar(Gen *l) {
             if (!atomo(l)) {
                 push(&p, l);
                 l = Head(l);
-    
+
                 if (l != NULL) {
                     if (aux == NULL) {
                         aux = cons(NULL, NULL);
@@ -746,14 +746,15 @@ Gen * duplicar(Gen *l) {
                     } else {
                         aux->no.lista.cabeca = cons(NULL, NULL);
                         push(&p2, aux);
-                        aux = Head(aux);                    
+                        aux = Head(aux);
                     }
                 }
-            } else {                
+            } else {
+                aux->no.lista.cabeca = criaT(l->no.info);
+
                 pop(&p, &l);
                 l = Tail(l);
-                
-                aux->no.lista.cabeca = criaT(l->no.info);
+
                 //Tem dois casos, em um deles vc volta "la em cima" para continuar a listagen
                 //no outro voce quer voltar no pai para criar um irmao da sublista
                 if (l != NULL) {
@@ -773,7 +774,6 @@ Gen * duplicar(Gen *l) {
             }
         }
     }
-    
 
     return ret;
 }
@@ -839,6 +839,12 @@ char compara(Gen *l, Gen *l2) {
 
     return flag;
 }
+
+// a) codifique a rotina Len(L), que dá o comprimento de uma lista generaliza L. Admita que a lista nula 
+// tem comprimento 0 e que a operação não pode ser aplicada a átomos. 
+ 
+// b)  codifique  a  rotina  Deph(L),  que  dá  a  profundidade  de  uma  lista  generalizada  L.  Admita  que 
+// átomos têm profundidade 0 e listas vazias têm profundidade 1.
 
 
 int main(void) {
