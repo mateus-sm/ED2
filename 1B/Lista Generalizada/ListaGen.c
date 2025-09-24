@@ -842,7 +842,23 @@ char compara(Gen *l, Gen *l2) {
 
 // a) codifique a rotina Len(L), que dá o comprimento de uma lista generaliza L. Admita que a lista nula 
 // tem comprimento 0 e que a operação não pode ser aplicada a átomos. 
- 
+int Len(Gen* l) {
+    Gen *aux = l;
+    int len = 0;
+
+    if (l != NULL) {
+        while (aux != NULL) {
+            if (!nula(Head(l))) {
+                len++;
+            }
+
+            aux = Tail(aux);
+        }
+    }
+
+    return len;
+}
+
 // b)  codifique  a  rotina  Deph(L),  que  dá  a  profundidade  de  uma  lista  generalizada  L.  Admita  que 
 // átomos têm profundidade 0 e listas vazias têm profundidade 1.
 
@@ -864,6 +880,7 @@ int main(void) {
     exibir(lista); //exibirLista(lista); puts("");
     reordena(lista);
     exibir(lista);
+    printf("O comprimento da lista eh %d\n", Len(lista));
     
     insere(&lista, "b", 1); //Não insere, pois já tem o “b”!
     insere(&lista, "b", 2);
