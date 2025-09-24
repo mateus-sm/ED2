@@ -1,1 +1,9 @@
-Algoritmos a serem implementados no TAD Matriz Esparsa:a) inicializar uma matriz esparsa;b) inserir um determinado elemento na posição i, j;c) excluir um elemento da posição i, j;d) exibir uma matriz esparsa;e) somar duas matrizes esparsas e gerar uma terceira;f) fazer a multiplicação de duas matrizes esparsas e gerar uma terceira;g) excluir uma matriz esparsa.
+Algoritmos a serem implementados no TAD Matriz Esparsa:
+
+a) inicializar uma matriz esparsa;
+b) inserir um determinado elemento na posiÃ§Ã£o i, j;
+c) excluir um elemento da posiÃ§Ã£o i, j;
+d) exibir uma matriz esparsa;
+e) somar duas matrizes esparsas e gerar uma terceira;
+f) fazer a multiplicaÃ§Ã£o de duas matrizes esparsas e gerar uma terceira;
+g) excluir uma matriz esparsa.

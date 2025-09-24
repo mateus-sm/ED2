@@ -173,6 +173,77 @@ void exibeMat(Desc *desc, int x, int y) {
     }
 }
 
+void remover(Desc *desc, int x, int y) {
+	Pont *linha, *coluna, *pont;
+	Cel *cel, *ant, *aux;
+
+	Posicionar(&desc->lin, x, &linha);
+	Posicionar(&desc->col, y, &coluna);
+
+	VerificaOcupado(linha, y, &cel);
+
+	if (cel != NULL) {
+		//Linha
+		if(linha->prim == cel) { //Primeira cel
+			linha->prim = cel->plin;
+		} 
+		else { //Meio ou fim
+			ant = linha->prim;
+			aux = ant->plin;
+
+			while(aux != NULL && aux != cel) {
+				ant = aux;
+				aux = aux->plin;
+			}
+
+			if (aux != NULL && aux->linha == x) { //Achei quem excluir
+				ant->plin = aux->plin;
+			}
+		}
+
+		//Coluna
+		if (coluna->prim == cel) {
+			coluna->prim = cel->pcol;
+		}
+		else {
+			ant = coluna->prim;
+			aux = ant->pcol;
+
+			while(aux != NULL && aux != cel) {
+				ant = aux;
+				aux = aux->pcol;
+			}
+
+			if (aux != NULL && aux->coluna == y) {
+				ant->pcol = aux->pcol;
+			}
+		}
+		free(cel);
+
+		//Remover indices caso necessario
+		if (linha->prim == NULL) {
+			if (desc->lin == linha) { //Primeiro indice
+				desc->lin = linha->prox;
+			} else { //Meio ou fim
+				pont = desc->lin;
+				while (pont->prox != linha) pont = pont->prox;
+				pont->prox = linha->prox;
+			}
+			free(linha);
+		}
+		if (coluna->prim == NULL) {
+			if (desc->col == coluna) {
+				desc->col == coluna->prox;
+			} else {
+				pont = desc->col;
+				while (pont->prox != coluna) pont = pont->prox;
+				pont->prox = coluna->prox;
+				free(coluna);
+
+			}
+		}
+	}
+}
 
 int main(void) {
 	Desc desc;
@@ -180,10 +251,20 @@ int main(void) {
 
 	InsereMat(&desc, 0, 0, 1);
 	InsereMat(&desc, 1, 1, 1);
+	InsereMat(&desc, 2, 0, 1);
 	InsereMat(&desc, 2, 2, 1);
+	InsereMat(&desc, 2, 4, 1);
 	InsereMat(&desc, 3, 3, 1);
+	InsereMat(&desc, 4, 4, 1);
+	exibeMat(&desc, 5, 5);
+	puts("");
 
-	exibeMat(&desc, 4, 4);
+	remover(&desc, 0, 0);
+	remover(&desc, 2, 0);
+	remover(&desc, 2, 2);
+	remover(&desc, 2, 4);
+	exibeMat(&desc, 5, 5);
+
 	system("pause");
 	return 0;
 }
