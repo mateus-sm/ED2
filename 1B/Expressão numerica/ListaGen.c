@@ -120,7 +120,7 @@ void exibir(Exp* l) {
 
 void gerarListaGen(Exp **e, char *str) {
     Info uni;
-    Exp *caixa, *lista, *aux;
+    Exp *caixa, *lista;
     Pilha p;
     char func[20];
     int j;
@@ -240,6 +240,8 @@ double resolveFunc(char *func) {
     else if (strcmp(nome, "cos") == 0) {
         return cos(x - y);
     }
+
+    return 0;
 }
 
 char plana(Exp *e) {
