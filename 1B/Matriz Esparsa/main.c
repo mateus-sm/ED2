@@ -152,15 +152,15 @@ void InsereMat(Desc *desc, int x, int y, int valor) {
 	}
 }
 
-void exibeMat(Desc *desc, int maxLinha, int maxColuna) {
-    Pont *auxLinha = desc->lin;
+void exibeMat(Desc *desc, int x, int y) {
+    Pont *Linha = desc->lin;
+	Cel *atual;
 
-    while (auxLinha) {
-        Cel *atual = auxLinha->prim;
-        int col = 0;
+    while (Linha != NULL) {
+        atual = Linha->prim;
 
-        for (int j = 0; j < maxColuna; j++) {
-            if (atual && atual->coluna == j) {
+        for (int i = 0; i < y; i++) {
+            if (atual != NULL && atual->coluna == i) {
                 printf("%d ", atual->valor);
                 atual = atual->plin;
             } else {
@@ -168,7 +168,8 @@ void exibeMat(Desc *desc, int maxLinha, int maxColuna) {
             }
         }
         printf("\n");
-        auxLinha = auxLinha->prox;
+
+        Linha = Linha->prox;
     }
 }
 
