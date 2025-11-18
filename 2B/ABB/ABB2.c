@@ -68,7 +68,7 @@ void exibirABB(Tree *arv, int *n) {
 }
 
 //Busca
-Tree* busca(Tree* raiz, char *str) {
+Tree* buscaRet(Tree* raiz, char *str) {
     Tree* no = raiz, *achou = NULL;
     Pilha p;
     inicializaPilha(&p);
@@ -91,8 +91,8 @@ Tree* busca(Tree* raiz, char *str) {
 
 //Faça um algoritmo que retorne por referência ou por return o nível (ou profundidade)
 // de um dado nó de uma Árvore Binária de Busca.
-int nivel(Tree* arv) {
-    int nivel = 1;
+void nivel(Tree* arv) {
+    int nivel = 1, aux = 0;
     Tree* no = arv;
     Pilha p;
     inicializaPilha(&p);
@@ -102,7 +102,14 @@ int nivel(Tree* arv) {
             pop(&p, &no);
             nivel--;
             no = no->dir;
-            if (no != NULL) { nivel++; }
+            nivel++;
+
+            if (no != NULL) {
+                aux++;
+            } else {
+                nivel -= aux;
+                aux = 0;
+            }
         } else {
             printf("No: %s nivel: %d\n", no->info, nivel);
             push(&p, no);
@@ -222,10 +229,110 @@ void apagar(Tree **arv) {
     }
 }
 
+void exclusao(Tree **arv, Tree *e, Tree *pai, char lado) {
+    Tree *paisub, *sub;
+    char nome[8];
+
+    //1° Caso, Excluir elemento de uma folha
+    if (e->esq == NULL && e->dir == NULL) {
+        //Verificar se exc e raiz são iguais
+        if (e != *arv) {
+            //Achar o filho pela info
+            if (strcmp(e->info, pai->info) > 0) {
+                pai->dir = NULL;
+            } else {
+                pai->esq = NULL;
+            }
+        } else {
+            *arv = NULL;
+        }
+        free(e);
+    }
+    else {
+        //2° Caso, Excluir elemento com 1 filho
+        if (e->esq == NULL || e->dir == NULL) {
+            //Verificar se exc e raiz são iguais
+            if (e != *arv) {
+                //Verificar o lado que tá o filho
+                if (strcmp(e->info, pai->info) > 0) {
+                    if (e->esq != NULL) {
+                        pai->dir = e->esq;
+                    } else {
+                        pai->dir = e->dir;
+                    }
+                } else {
+                    if (e->esq != NULL) {
+                        pai->esq = e->esq;
+                    } else {
+                        pai->esq = e->dir;
+                    }
+                }
+            } else {
+                if (e->esq != NULL) {
+                    *arv = e->esq;
+                } else {
+                    *arv = e->dir;
+                }
+            }
+            free(e);
+        }
+        else {
+            //3° Caso, Excluir elemento com 2 filhos
+            paisub = e;
+            //Busca um substituto e coloca no lugar do excluido
+            if (lado == 'd') {
+                sub = e->dir;
+                while (sub->esq != NULL) {
+                    paisub = sub;
+                    sub = sub->esq;
+                }
+            } else {
+                sub = e->esq;
+                while (sub->dir != NULL) {
+                    paisub = sub;
+                    sub = sub->dir;
+                }
+            }
+            strcpy(nome, sub->info);
+            exclusao(&(*arv), sub, paisub, lado);
+            strcpy(e->info, nome);
+        }
+    }
+}
+
+void busca(Tree *raiz, char nome[8], Tree **e, Tree **pai) {
+    *e = *pai = raiz;
+
+    while (*e != NULL && strcmp((*e)->info, nome) != 0) {
+        *pai = *e;
+        if (strcmp((*e)->info, nome) > 0) {
+            *e = (*e)->esq;
+        } else {
+            *e = (*e)->dir;
+        }
+    }
+}
+
+void balanceamento(Tree **arv) {
+    Tree *no;
+
+    Fila f;
+    inicializaFila(&f);
+
+    enqueue(&f, *arv);
+    while (!filaVazia(&f)) {
+        dequeue(&f, &no);
+
+        if (no->esq != NULL) { enqueue(&f, no->esq); }
+        if (no->esq != NULL) { enqueue(&f, no->dir); }
+    }
+}
+
 int main (void) {
     Tree* abb;
     inicializaABB(&abb);
 
+    //Inserir
     char *nomes[] = {
         "Bia", "Ana", "Caio", "Mat", "Diana",
         "Eli", "Zoe", "Lara", "Gabi", "Nina",
@@ -237,25 +344,37 @@ int main (void) {
         inserir(&abb, nomes[i]);
     }
 
+    //Exibir
     int n = -1;
     exibirABB(abb, &n);
 
+    //Buscar
     Tree* no;
-    no = busca(abb, "Mat");
+    no = buscaRet(abb, "Mat");
     printf("\nNo buscado: %s\n", no->info);
     puts("");
 
+    //Nivel
     nivel(abb);
 
+    //Buscar pai
     char nome[8];
     strcpy(nome, "Ana");
     no = buscaPai(abb, nome);
     printf("\nPai de '%s': %s\n\n", nome, no->info);
 
+    //Exibir em ordens diferentes
     preOrdem(abb);
     inOrdem(abb);
     posOrdem(abb);
 
+    //Exclusao de um nó
+    Tree *e, *pai;
+    busca(abb, "Mat", &e, &pai);
+    exclusao(&abb, e, pai, 'e');
+    exibirABB(abb, &n);
+
+    //Apagar arvore
     apagar(&abb);
     exibirABB(abb, &n);
 
