@@ -505,7 +505,7 @@ int main() {
 
     // pai = Pai(t, 40);
     // printf("%d\n", pai->info);
-    system("pause");
+    //system("pause");
 
     return 0;
 }
