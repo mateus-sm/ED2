@@ -4,7 +4,7 @@
 #define MAX 100
 
 struct tree {
-    int info;
+    double info;
     struct tree *esq, *dir;
 };
 
@@ -19,7 +19,7 @@ void inicializaArv(Tree **t) {
 }
 
 //Criar um nó
-Tree *criaNoArv(int info) {
+Tree *criaNoArv(double info) {
     Tree *aux;
 
     aux = (Tree*)malloc(sizeof(Tree));
@@ -37,7 +37,7 @@ char arvVazia(Tree *t) {
 
 // Insere na árvore binária de busca
 // Checar os valores, inserir de acordo com tamanho
-void insereArv(Tree **t, int info) {
+void insereArv(Tree **t, double info) {
     Tree *aux = *t, *ant = NULL;
     Pilha P;
     inicializaPilha(&P);
@@ -58,7 +58,7 @@ void insereArv(Tree **t, int info) {
     }
 }
 
-void inserirArv(Tree **t, int info) {
+void inserirArv(Tree **t, double info) {
     if(*t == NULL) {
         *t = criaNoArv(info);
     } else {
@@ -72,7 +72,7 @@ void inserirArv(Tree **t, int info) {
 
 //Verificar qual o nível (ou profundidade) de um dado nó.
 // Arvore ABB, NÃO precisa percorrer ela por inteiro
-int nivel(Tree *t, int info) {
+int nivel(Tree *t, double info) {
     Tree *aux = t;
     Pilha P;
     int nivel = 1;
@@ -192,7 +192,7 @@ void Order3(Tree *t) {
 //Retornar o pai de um dado nó.
 //Estratégia: toda vez que for pra esq ou dir verificar o atual com o prox
 //Percorrer arvore por completo pois não há ordenação
-Tree *Pai(Tree *t, int info) {
+Tree *Pai(Tree *t, double info) {
     Tree *raiz = t, *aux = NULL, *pai = NULL;
     Pilha P;
 
@@ -231,13 +231,13 @@ void exibir(Tree *arv, int *n) {
         (*n)++;
         exibir(arv->dir, n);
         for(int i = 0; i < 5 * (*n); i++) {printf(" ");}
-        printf("(%d)\n", arv->info);
+        printf("(%.2lf)\n", arv->info);
         exibir(arv->esq, n);
         (*n)--;
     }
 }
 
-void busca(Tree *raiz, int info, Tree **e, Tree **pai) {
+void busca(Tree *raiz, double info, Tree **e, Tree **pai) {
     *e = *pai = raiz;
     while(*e != NULL && (*e)->info != info) {
         *pai = *e;
@@ -267,22 +267,44 @@ void quantNo(Tree *t, int *qtd) {
 }
 
 void altura(Tree *raiz, int nivel, int *maior) {
-
+    if (raiz != NULL) {
+        if (nivel > *maior) {
+            *maior = nivel;
+        }
+        altura(raiz->dir, nivel + 1, &*maior);
+        altura(raiz->esq, nivel + 1, &*maior);
+    }
 }
 
 int alturaAVL(Tree *raiz) {
-
+    int maior = 0;
+    altura(raiz, 1, &maior);
+    return maior;
 }
 
 void rotacaoEsquerda(Tree **p) {
+    Tree *q, *temp;
 
+    q = (*p)->dir;
+    temp = q->esq;
+
+    q->esq = *p;
+    (*p)->dir = temp;
+    (*p) = q;
 }
 
 void rotacaoDireita(Tree **p) {
+    Tree *q, *temp;
 
+    q = (*p)->esq;
+    temp = q->dir;
+
+    q->dir = *p;
+    (*p)->esq = temp;
+    (*p) = q;
 }
 
-void inserirAVL(Tree **raiz, int info, char *flag) {
+void inserirAVL(Tree **raiz, double info, char *flag) {
     int fb, fbfilho;
 
     if(*raiz == NULL) {
@@ -326,16 +348,80 @@ void inserirAVL(Tree **raiz, int info, char *flag) {
 }
 
 void inserirIterativo(Tree **raiz, int valor) {
+    int rotacionou = 0, FB, FBfilho;
+    Tree *aux, *ant;
+    Pilha p;
+    inicializaPilha(&p);
 
+    if (*raiz == NULL) {
+        *raiz = criaNoArv(valor);
+    } else {
         //Acho o local que vai entrar o no novo
+        aux = *raiz;
+        ant = aux;
+        while (aux != NULL) {
+            ant = aux;
+            push(&p, aux);
+            if (valor < aux->info) {
+                aux = aux->esq;
+            } else {
+                aux = aux->dir;
+            }
+        }
 
         //Crio o no
+        if (valor > ant->info) {
+            ant->dir = criaNoArv(valor);
+        } else {
+            ant->esq = criaNoArv(valor);
+        }
 
         //Enquanto eu tenho elementos e a pilha nao rotacionou
-        //(2)(1)
-        //(2)(-1)
-        //(-2)(-1)
-        //(-2)(1)
+        while (!pilhaVazia(&p) && !rotacionou) {
+            pop(&p, &aux);
+            FB = alturaAVL(aux->dir) - alturaAVL(aux->esq);
+
+            if (FB == 2 || FB == -2) {
+                rotacionou = 1;
+
+                if (FB == 2) {
+                    FBfilho = alturaAVL(aux->dir->dir) - alturaAVL(aux->dir->esq);
+
+                    //(2)(1)
+                    if (FBfilho == 1) {
+                        rotacaoEsquerda(&aux);
+                    } else { // (2) (-1)
+                        rotacaoDireita(&(aux->dir));
+                        rotacaoEsquerda(&aux);
+                    }
+                }
+                else {
+                    FBfilho = alturaAVL(aux->esq->dir) - alturaAVL(aux->esq->esq);
+
+                    //(-2)(-1)
+                    if (FBfilho == -1) {
+                        rotacaoDireita(&aux);
+                    } else { //(-2)(1)
+                        rotacaoEsquerda(&(aux->esq));
+                        rotacaoDireita(&aux);
+                    }
+                }
+
+                //Verificar estado da pilha após rotacionar
+                if (!pilhaVazia(&p)) {
+                    pop(&p, &ant);
+
+                    if (aux->info > ant->info) {
+                        ant->dir = aux;
+                    } else {
+                        ant->esq = aux;
+                    }
+                } else {
+                    *raiz = aux;
+                }
+            }
+        }
+    }
 }
 
 int main() {
@@ -353,15 +439,17 @@ int main() {
     inserirIterativo(&t, 9);
     n = -1;
     exibir(t, &n);
-    system("pause");
+    //system("pause");
     inserirIterativo(&t, 10); // Rotação simples no 8
     n = -1;
     exibir(t, &n);
-    system("pause");
+    //system("pause");
     inserirIterativo(&t, 11);
     inserirIterativo(&t, 12);
     inserirIterativo(&t, 13);
     inserirIterativo(&t, 14);
+    inserirIterativo(&t, 7);
+    inserirIterativo(&t, 6);
     // inserirAVL(&t, 5, &flag);
     // inserirAVL(&t, 3, &flag);
     // inserirAVL(&t, 2, &flag);
@@ -386,7 +474,7 @@ int main() {
     // n = -1;
     // exibir(t, &n);
 
-    system("pause");
+    //system("pause");
 
     return 0;
 }

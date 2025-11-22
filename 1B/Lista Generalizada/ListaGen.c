@@ -42,12 +42,16 @@ Gen* Head(Gen *l) {
     if (!atomo(l) && !nula(l)) {
         return l->no.lista.cabeca;
     }
+
+    return NULL;
 }
 
 Gen* Tail(Gen *l) {
     if (!atomo(l) && !nula(l)) {
         return l->no.lista.cauda;
     }
+
+    return NULL;
 }
 
 Gen* criaT(char *info) {
@@ -65,6 +69,8 @@ Gen* cons(Gen* H, Gen* T) {
         l->no.lista.cauda = T;
         return l;
     }
+
+    return NULL;
 }
 
 void exibir(Gen* l) {
@@ -213,17 +219,14 @@ void reordena(Gen *l) {
 }
 
 Gen *construirLista(char *str) { //Ex: "[x, a, [c, d], [e, a, [f]], b]" "[]"
-    Gen *l, *ret = NULL, *aux;
+    Gen *l, *ret = NULL;
     Pilha P;
     inicializaPilha(&P);
     char info[50];
     int i = 1, j, TL = strlen(str);
 
     if (TL > 2) { // "[]" seria l = NULL
-        l = (Gen*)malloc(sizeof(Gen));
-        l->terminal = 0;
-        l->no.lista.cabeca = NULL;
-        l->no.lista.cauda = NULL;
+        l = cons(NULL, NULL);
         ret = l;
 
         while(i < TL) {
@@ -275,14 +278,8 @@ void insereAtomo(char info[8], Gen** l) {
     Gen *aux, *atual, *no, *caixa;
     int flag = 0;
 
-    caixa = (Gen*)malloc(sizeof(Gen));
-    caixa->terminal = 0;
-    caixa->no.lista.cabeca = NULL;
-    caixa->no.lista.cauda = NULL;
-
-    no = (Gen*)malloc(sizeof(Gen));
-    no->terminal = 1;
-    strcpy(no->no.info, info);
+    caixa = cons(NULL, NULL);
+    no = criaT(info);
 
     //Trata inserir no primeiro espaço
     if (atomo(Head(*l))) {
@@ -397,11 +394,13 @@ void excluiNivel(Gen *l, int nivelAlvo) {
         }
     }
 
+    //p2 possui os pais das sublistas que tem que ser tratadas
     inicializaPilha(&p1);
     while(!pilhaVazia(&p2)) {
         pop(&p2, &aux2);
         aux = Head(aux2);
 
+        //Exclui se for do nivel correto, caso nao guarda em p3
         while (aux != NULL) {
             if (atomo(Head(aux))) {
                 exc = aux;
@@ -414,14 +413,17 @@ void excluiNivel(Gen *l, int nivelAlvo) {
             }
         }
 
+        //Inverte a ordem pa ficar certo
         while(!pilhaVazia(&p3)) {
             pop(&p3, &aux);
             push(&p1, aux);
         }
 
+        //Conecta o pai dessa sublista no primeiro elem que nao foi excluido
         pop(&p1, &aux);
         aux2->no.lista.cabeca = aux;
         aux2 = Head(aux2);
+        //Conecta o primeiro q nao foi excluido aos demais
         while(!pilhaVazia(&p1)) {
             pop(&p1, &aux);
             aux2->no.lista.cauda = aux;
@@ -545,7 +547,7 @@ void criaFila(Gen *lista, Fila **f) {
             lista = Tail(lista);
             nivel--;
         } else {
-            if (!atomo(lista)) {    
+            if (!atomo(lista)) {
                 push(&p, lista);
                 if (atomo(Head(lista))) {
                     insereFila(f, lista->no.lista.cabeca->no.info, nivel);

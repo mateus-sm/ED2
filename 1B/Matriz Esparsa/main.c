@@ -233,7 +233,7 @@ void remover(Desc *desc, int x, int y) {
 		}
 		if (coluna->prim == NULL) {
 			if (desc->col == coluna) {
-				desc->col == coluna->prox;
+				desc->col = coluna->prox;
 			} else {
 				pont = desc->col;
 				while (pont->prox != coluna) pont = pont->prox;

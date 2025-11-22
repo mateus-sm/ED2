@@ -20,7 +20,7 @@ Tree* criaNo(char* str) {
     return no;
 }
 
-//Inicializar uma arvore binaria de busca
+//Inicializar uma árvore binaria de busca
 void inicializaABB(Tree** raiz) {
     *raiz = criaNo("*");
 }
@@ -313,29 +313,8 @@ void busca(Tree *raiz, char nome[8], Tree **e, Tree **pai) {
     }
 }
 
-int quantNo(Tree *no) {
-    Pilha p;
-    inicializaPilha(&p);
-    int i = 0;
-
-    while (no != NULL || !pilhaVazia(&p)) {
-        if (no == NULL) {
-            pop(&p, &no);
-            i++;
-            no = no->dir;
-        } else {
-            push(&p, no);
-            no = no->esq;
-        }
-    }
-
-    return i;
-}
-
 void balanceamento(Tree **arv) {
-    int fb, nodir, noesq;
-    char aux[8];
-    Tree *no = NULL, *e = NULL, *pai = NULL;
+    Tree *no;
 
     Fila f;
     inicializaFila(&f);
@@ -344,37 +323,14 @@ void balanceamento(Tree **arv) {
     while (!filaVazia(&f)) {
         dequeue(&f, &no);
 
-        do {
-            nodir = noesq = 0;
-            nodir = quantNo(no->dir);
-            noesq = quantNo(no->esq);
-            fb = nodir - noesq;
-
-            if (fb > 1 || fb < -1) {
-                strcpy(aux, no->info);
-
-                busca(*arv, aux, &e, &pai);
-                no = (no->esq == NULL) ? no->dir : (no->dir == NULL) ? no->esq : no;
-
-                if (fb > 0) {
-                    exclusao(&*arv, e, pai, 'd');
-                } else {
-                    exclusao(&*arv, e, pai, 'e');
-                }
-
-                inserir(&(*arv), aux);
-            }
-
-        } while (fb > 1 || fb < -1);
-
         if (no->esq != NULL) { enqueue(&f, no->esq); }
-        if (no->dir != NULL) { enqueue(&f, no->dir); }
+        if (no->esq != NULL) { enqueue(&f, no->dir); }
     }
 }
 
 int main (void) {
-    Tree* abb = NULL;
-    //inicializaABB(&abb);
+    Tree* abb;
+    inicializaABB(&abb);
 
     //Inserir
     char *nomes[] = {
@@ -419,14 +375,9 @@ int main (void) {
     exclusao(&abb, e, pai, 'e');
     exibirABB(abb, &n);
 
-    //Balancear arvore
-    balanceamento(&abb);
-    exibirABB(abb, &n);
-
     //Apagar arvore
     apagar(&abb);
     exibirABB(abb, &n);
 
-    //system("pause");
     return 0;
 }
