@@ -143,8 +143,7 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
     //Excluir reg na ultima pos
     //Excluir reg com elo != 0
 
-    int ender, tl, chave;
-    char status;
+    int ender, tl;
     Reg aux;
 
     if (reg.status == 'F') {
@@ -156,16 +155,16 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
         }
         else { //Excluir reg com elo != 0
             ender = reg.elo;
-            chave = reg.numero;
+            tl = fileSize(arq) - 1;
 
             //Copia o reg ender para o reg
             fseek(arq, ender * sizeof(Reg), 0);
-            fread(&aux, sizeof(Reg), 1, arq);
-            status = aux.status;
+            fread(&reg, sizeof(Reg), 1, arq);
             fseek(arq, (*pos) * sizeof(Reg), 0);
-            fwrite(&aux, sizeof(Reg), 1, arq);
+            fwrite(&reg, sizeof(Reg), 1, arq);
 
-            tl = fileSize(arq) - 1;
+            //Se o substituto for falso, o algoritmo tem que passar denono na mesma linha
+            if (reg.status == 'F') { (*pos)--; }
 
             //Removido reg original da area de dados, tratar overflow
             //Se o reg original apontava para tl, basta fazer o ftruncate
@@ -173,27 +172,18 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
                 //Substitui quem o elo apontava pelo ultimo reg
                 fseek(arq, tl * sizeof(Reg), 0);
                 fread(&reg, sizeof(Reg), 1, arq);
-                chave = reg.numero;
                 fseek(arq, ender * sizeof(Reg), 0);
+                fwrite(&reg, sizeof(Reg), 1, arq);
+
+                //Atualizar quem apontava para tl, pois ele foi movido
+                fseek(arq,Hash(reg.numero) * sizeof(Reg), 0);
+                fread(&reg, sizeof(Reg), 1, arq);
+                reg.elo = ender;
+                fseek(arq,Hash(reg.numero) * sizeof(Reg), 0);
                 fwrite(&reg, sizeof(Reg), 1, arq);
             }
 
             ftruncate(fileno(arq), tl * sizeof(Reg));
-
-            //Se o ender do reg original, apontar para tl, esse reg é o original
-            //Caso contrario esse reg é o apontado do apontado pelo reg
-            if (reg.elo != tl) {
-                //Atualizar area de dados
-                fseek(arq,Hash(chave) * sizeof(Reg), 0);
-                fread(&aux, sizeof(Reg), 1, arq);
-                aux.elo = ender;
-                fseek(arq,Hash(chave) * sizeof(Reg), 0);
-                fwrite(&aux, sizeof(Reg), 1, arq);
-            }
-
-            if (status == 'F') {
-                (*pos)--;
-            }
         }
     }
     else {
