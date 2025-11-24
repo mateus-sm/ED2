@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #define N 13
 
@@ -132,7 +133,7 @@ void excluir (char *nome, int chave) {
     fclose(arq);
 }
 
-void resolveEncadeamento(FILE *arq, Reg reg, int pos) {
+void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
     //Possibilidades
     //Area de dados
     //Excluir reg com elo 0
@@ -142,18 +143,57 @@ void resolveEncadeamento(FILE *arq, Reg reg, int pos) {
     //Excluir reg na ultima pos
     //Excluir reg com elo != 0
 
-    int ender;
+    int ender, tl, chave;
+    char status;
     Reg aux;
 
     if (reg.status == 'F') {
         //Excluir reg com elo 0
         if (reg.elo == 0) {
             aux = inserirDados(0, "", 0);
-            fseek(arq, pos * sizeof(Reg), 0);
+            fseek(arq, (*pos) * sizeof(Reg), 0);
             fwrite(&aux, sizeof(Reg), 1, arq);
         }
         else { //Excluir reg com elo != 0
+            ender = reg.elo;
+            chave = reg.numero;
 
+            //Copia o reg ender para o reg
+            fseek(arq, ender * sizeof(Reg), 0);
+            fread(&aux, sizeof(Reg), 1, arq);
+            status = aux.status;
+            fseek(arq, (*pos) * sizeof(Reg), 0);
+            fwrite(&aux, sizeof(Reg), 1, arq);
+
+            tl = fileSize(arq) - 1;
+
+            //Removido reg original da area de dados, tratar overflow
+            //Se o reg original apontava para tl, basta fazer o ftruncate
+            if (ender != tl) {
+                //Substitui quem o elo apontava pelo ultimo reg
+                fseek(arq, tl * sizeof(Reg), 0);
+                fread(&reg, sizeof(Reg), 1, arq);
+                chave = reg.numero;
+                fseek(arq, ender * sizeof(Reg), 0);
+                fwrite(&reg, sizeof(Reg), 1, arq);
+            }
+
+            ftruncate(fileno(arq), tl * sizeof(Reg));
+
+            //Se o ender do reg original, apontar para tl, esse reg é o original
+            //Caso contrario esse reg é o apontado do apontado pelo reg
+            if (reg.elo != tl) {
+                //Atualizar area de dados
+                fseek(arq,Hash(chave) * sizeof(Reg), 0);
+                fread(&aux, sizeof(Reg), 1, arq);
+                aux.elo = ender;
+                fseek(arq,Hash(chave) * sizeof(Reg), 0);
+                fwrite(&aux, sizeof(Reg), 1, arq);
+            }
+
+            if (status == 'F') {
+                (*pos)--;
+            }
         }
     }
     else {
@@ -168,7 +208,7 @@ void reorganiza(char *nome) {
     for (int i = 0; i < N; i++) {
         fseek(arq, i * sizeof(Reg), 0);
         fread(&reg, sizeof(Reg), 1, arq);
-        resolveEncadeamento(arq, reg, i);
+        resolveEncadeamento(arq, reg, &i);
         //printf("%3d | %4d | %-10s | %7.2f | %c | %3d\n", i, reg.numero, reg.nome, reg.salario, reg.status, reg.elo);
     }
 
@@ -220,8 +260,11 @@ int main(void) {
     exibir("arqHash.dat");
     puts("");
 
-    // reorganiza("arqHash.dat");
-    // exibir("arqHash.dat");
+    reorganiza("arqHash.dat");
+    exibir("arqHash.dat");
 
+    remove("arqHash.dat");
+
+    //system("pause");
     return 0;
 }
