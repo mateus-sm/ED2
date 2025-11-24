@@ -415,6 +415,6 @@ int main(void){
 
     reorganiza("arquivo.dat");
     exibir("arquivo.dat");
-    
+    system("pause");
     return 0;
 }

@@ -143,7 +143,7 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
     //Excluir reg na ultima pos
     //Excluir reg com elo != 0
 
-    int ender, tl;
+    int ender, prox, ant, tl = fileSize(arq) - 1;
     Reg aux;
 
     if (reg.status == 'F') {
@@ -155,8 +155,6 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
         }
         else { //Excluir reg com elo != 0
             ender = reg.elo;
-            tl = fileSize(arq) - 1;
-
             //Copia o reg ender para o reg
             fseek(arq, ender * sizeof(Reg), 0);
             fread(&reg, sizeof(Reg), 1, arq);
@@ -187,6 +185,39 @@ void resolveEncadeamento(FILE *arq, Reg reg, int *pos) {
         }
     }
     else {
+        ender = reg.elo;
+        while (ender != 0) {
+            //Pegar quem o elo aponta
+            fseek(arq, ender * sizeof(Reg), 0);
+            fread(&aux, sizeof(Reg), 1, arq);
+            //Guardar atual e prox
+            ant = ender;
+            ender = aux.elo;
+
+            if (aux.status == 'F') {
+                //Caso o reg excluido nao for o ultimo, ir no final e pegar o substituto
+                if (ender != tl) {
+                    fseek(arq, tl * sizeof(Reg), 0);
+                    fread(&reg, sizeof(Reg), 1, arq);
+                    fseek(arq, ender * sizeof(Reg), 0);
+                    fwrite(&reg, sizeof(Reg), 1, arq);
+
+                    //Atualiza area de dados
+                    fseek(arq, Hash(reg.numero) * sizeof(Reg), 0);
+                    fread(&aux, sizeof(Reg), 1, arq);
+                    // while (aux.elo != 0) {
+                    //     fseek(arq, aux.elo * sizeof(Reg), 0);
+                    //     fread(&aux, sizeof(Reg), 1, arq);
+                    // }
+                    aux.elo = ender;
+                    fseek(arq, Hash(reg.numero) * sizeof(Reg), 0);
+                    fwrite(&aux, sizeof(Reg), 1, arq);
+                }
+                //Apagar eof
+                ftruncate(fileno(arq), tl * sizeof(Reg));
+                tl--;
+            }
+        }
 
     }
 }
@@ -231,6 +262,7 @@ int main(void) {
     //Hash 12
     insereHash("arqHash.dat", inserirDados(1000, "Ademar", 1200));
     insereHash("arqHash.dat", inserirDados(2300, "Gerson", 800));
+    insereHash("arqHash.dat", inserirDados(12, "Senor", 2222));
 
     // insereHash("arqHash.dat", inserirDados(4, "TESTEELSE1", 1111));
     // insereHash("arqHash.dat", inserirDados(17, "TESTEELSE2", 2222));
@@ -245,8 +277,9 @@ int main(void) {
     //Exclusao Logica
     excluir("arqHash.dat", 1600);
     excluir("arqHash.dat", 1700);
-    excluir("arqHash.dat", 1950);
-    excluir("arqHash.dat", 2600);
+    //excluir("arqHash.dat", 1950);
+    //excluir("arqHash.dat", 2600);
+    excluir("arqHash.dat", 3000);
     exibir("arqHash.dat");
     puts("");
 
