@@ -13,6 +13,7 @@ typedef struct caixa Caixa;
 struct reg {
     int cod;
     char str[50];
+    int idade;
     char status;
 };
 
@@ -22,12 +23,12 @@ int Hash(int X) {
     return X % N;
 }
 
-Caixa *buscaLista(Caixa *caixa, int cod, Caixa **retorno) {
-    while (caixa != NULL && !caixa->chave == cod) {
+Caixa *buscaLista(Caixa *caixa, int chave, Caixa **retorno) {
+    while (caixa != NULL && chave > caixa->chave) {
         caixa = caixa->prox;
     }
 
-    if (caixa->chave == cod) {
+    if (caixa != NULL && caixa->chave == chave) {
         *retorno = caixa;
     } else {
         *retorno = NULL;
@@ -55,20 +56,20 @@ void insereLista(Caixa **caixa, Reg reg, int pos) {
 }
 
 void insereHash(Caixa T[], Reg reg) {
-    FILE *ptr = fopen("ArqHash.dat", "ab+");
+    FILE *ptr = fopen("Hash.dat", "ab+");
     int ender, pos;
     Caixa *aux;
 
     ender = Hash(reg.cod);
-    aux = buscaLista(&(T[ender]), reg.cod, &aux);
+    aux = buscaLista(&T[ender], reg.cod, &aux);
 
-    if (aux == NULL) {
+    if (aux == NULL) { //Reg nao esta na tabela
         fseek(ptr, 0, 2);
         pos = ftell(ptr) / sizeof(Reg);
         insereLista(&(T[ender]), reg, pos);
         fwrite(&reg, sizeof(Reg), 1, ptr);
     } else {
-        printf("Não encontrado!\n");
+        printf("Chave ja existe\n");
     }
 
     fclose(ptr);
@@ -84,7 +85,7 @@ int main(void) {
     insereHash(T, reg);
     system("pause");
 
-    printf("%d", T[Hash(reg.cod)].chave);
+    printf("%d\n", T[Hash(reg.cod)].chave);
 
     //Função do meio do quadrado
     // unsigned int chave = 225, v1;

@@ -6,6 +6,8 @@ struct gravar {
 };
 typedef struct gravar Gravar;
 
+#include "fila.h"
+
 #define LER(ptr, arq) fread(ptr, sizeof(*(ptr)), 1, arq)
 #define ESCREVER(ptr, arq) fwrite(ptr, sizeof(*(ptr)), 1, arq)
 #define POS_ATUAL(arq) (ftell(arq) / sizeof(Gravar))
@@ -33,13 +35,17 @@ void insereABB(Gravar rec) {
         do {
             if (rec.info > atual.info) {
                 if (atual.dir == -1) {
+                    //Guardar pos do reg pai
                     pos = POS_ATUAL(ptr) - 1;
 
+                    //Escrever o reg novo no final do arquivo
                     FIM(ptr);
                     ESCREVER(&rec, ptr);
 
+                    //Atualizar o reg pai com a pos do reg novo
                     atual.dir = POS_ATUAL(ptr) - 1;
 
+                    //Reescrever o reg pai para atualizar a pos
                     GOTO_POS(pos, ptr);
                     ESCREVER(&atual, ptr);
 
@@ -100,6 +106,6 @@ int main(void) {
     criaNoABB(&rec, 9);  insereABB(rec);
 
     exibirArq();
-    system("pause");
+    //system("pause");
     return 0;
 }
