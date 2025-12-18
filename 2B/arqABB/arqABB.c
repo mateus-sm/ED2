@@ -80,6 +80,69 @@ void insereABB(Gravar rec) {
     fclose(ptr);
 }
 
+void insereABB(Gravar rec) {
+    FILE *ptr = fopen("arqABB.dat", "rb+");
+    Gravar atual;
+    int flag, pos;
+
+    FIM(ptr);
+    int TF = ftell(ptr) / sizeof(Gravar);
+    rewind(ptr);
+
+    if (TF != 0) {
+        fread(&atual, sizeof(Gravar), 1, ptr); //LER(&atual, ptr);
+        flag = 0;
+
+        do {
+            if (rec.info > atual.info) {
+                if (atual.dir == -1) {
+                    //Guardar pos do reg pai
+                    //pos = POS_ATUAL(ptr) - 1;
+                    pos = (ftell(ptr) / sizeof(Gravar)) - 1;
+
+                    //Escrever o reg novo no final do arquivo
+                    fseek(ptr, 0, 2); //FIM(ptr);
+                    fwrite(&rec, sizeof(Gravar), 1, ptr); //ESCREVER(&rec, ptr);
+
+                    //Atualizar o reg pai com a pos do reg novo
+                    atual.dir = POS_ATUAL(ptr) - 1;
+                    atual.dir = (ftell(ptr) / sizeof(Gravar)) - 1;
+
+                    //Reescrever o reg pai para atualizar a pos
+                    fseek(ptr, pos, 0); //GOTO_POS(pos, ptr);
+                    fwrite(&atual, sizeof(Gravar), 1, ptr); //ESCREVER(&atual, ptr);
+
+                    flag = 1;
+                } else {
+                    fseek(ptr, atual.dir * sizeof(Gravar), 0); //GOTO_POS(atual.dir, ptr);
+                    fread(&atual, sizeof(Gravar), 1, ptr); //LER(&atual, ptr);
+                }
+            } else {
+                if (atual.esq == -1) {
+                    pos = POS_ATUAL(ptr) - 1;
+
+                    FIM(ptr);
+                    ESCREVER(&rec, ptr);
+
+                    atual.esq = POS_ATUAL(ptr) - 1;
+
+                    GOTO_POS(pos, ptr);
+                    ESCREVER(&atual, ptr);
+
+                    flag = 1;
+                } else {
+                    GOTO_POS(atual.esq, ptr);
+                    LER(&atual, ptr);
+                }
+            }
+        } while (!flag);
+    } else {
+        ESCREVER(&rec, ptr);
+    }
+
+    fclose(ptr);
+}
+
 void exibirArq() {
     FILE *ptr = fopen("arqABB.dat", "rb");
     Gravar rec;

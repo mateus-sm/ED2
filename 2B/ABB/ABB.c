@@ -108,7 +108,6 @@ void vazia(Tree **t) {
 void Order1(Tree *t) {
     Tree *raiz = t;
     Pilha P;
-
     inicializaPilha(&P);
 
     if (raiz != NULL) {
@@ -215,6 +214,8 @@ void listaDupla(Tree **t) {
             ant = raiz;
         }
     }
+
+    *t = lista;
 }
 
 //Retornar o pai de um dado nó.
@@ -409,7 +410,7 @@ void balanceamento(Tree **raiz) {
                 if (fb > 1 || fb < -1) {
                     aux = no->info;
                     
-                    //buca o pai do no
+                    //busca o pai do no
                     busca(*raiz, aux, &e, &pai);
                     //Se tver só um filho vai pra ele
                     no = (no->esq == NULL) ? no->dir : (no->dir == NULL) ? no->esq : no;
@@ -477,17 +478,18 @@ int main() {
     Order1(t);
     Order2(t);
     Order3(t);
-    //listaDupla(&t);
-    // while (t->dir != NULL) {
-    //     printf("%d ", t->info);
-    //     t = t->dir;
-    // }
-    // printf("|| ");
-    // while (t != NULL) {
-    //     printf("%d ", t->info);
-    //     t = t->esq;
-    // }
-    // system("pause");
+    // puts("");
+    // listaDupla(&t);
+    //  while (t->dir != NULL) {
+    //      printf("%d ", t->info);
+    //      t = t->dir;
+    //  }
+    //  printf("|| ");
+    //  while (t != NULL) {
+    //      printf("%d ", t->info);
+    //      t = t->esq;
+    //  }
+    //  system("pause");
 
     printf("\nAntecessores: \n");
     antecessores(t, 2);
